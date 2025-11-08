@@ -6,10 +6,10 @@
     {
       "name": "Trent Slade",
       "affiliation": "QSOL-IMC",
-      "orcid": ""
+      "orcid": "0009-0002-4515-9237"
     }
   ],
-  "description": "This release (v1.0.0) of Spectral Algebraics includes the E8 fractal power module, 20 audio presets, full 3D visualization engine, demo assets and documentation. See https://github.com/QSOLKCB/SPECTRAL",
+  "description": "This release (v1.0.0) of Spectral Algebraics includes the E8 fractal power module, 20 audio presets, full 3D visualization engine, demo assets, and documentation. See https://github.com/QSOLKCB/SPECTRAL for details.",
   "access_right": "open",
   "license": "Apache-2.0",
   "keywords": [
