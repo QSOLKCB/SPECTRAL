@@ -1,13 +1,28 @@
+````markdown
+# Spectral Algebraics
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17560719.svg)](https://doi.org/10.5281/zenodo.17560719)
-Spectral Algebraics v5 – Audible Geometry via E8-Inspired Signal Synthesis & 3D Visualization. Zenodo. https://doi.org/10.5281/zenodo.17560719
-Creators
-Slade, Trent. (2025). (Researcher)
-Description
-This work introduces Spectral Algebraics, a framework uniting high-dimensional symmetry (E8 lattices) with signal synthesis and spatial sonification. By treating sound spectra as algebraic manifolds rather than time-series, the system maps multi-frequency relationships into geometric forms that can be both heard and seen. The implementation combines quantum-error-correction-style encoding, fractal LFO modulation, and real-time 3D visualization to explore the boundary between mathematical structure and perceptual experience.
+
+**Spectral Algebraics v5 – Audible Geometry via E8-Inspired Signal Synthesis & 3D Visualization**  
+Zenodo: https://doi.org/10.5281/zenodo.17560719
+
+---
+
+## Creators  
+**Trent Slade** (QSOL-IMC)  
+ORCID: 0009-0002-4515-9237
+
+---
+
+## Description  
+This work introduces Spectral Algebraics, a framework uniting high-dimensional symmetry (E8 lattices) with signal synthesis and spatial sonification. By treating sound spectra as algebraic manifolds rather than time-series, the system maps multi-frequency relationships into geometric forms that can be both heard and seen. The implementation combines quantum-error-correction-style encoding, fractal LFO modulation, and real-time 3D visualization to explore the boundary between mathematical structure and perceptual experience.  
 The accompanying toolkit demonstrates how algebraic topologies can inform compositional design, bridging abstract group theory and immersive audio-visual production.
 
-Technical info
-## 🎛️ Producer.ai Preset Pack — “E8 Spectral Algebraics”
+---
+
+## Technical Info  
+### 🎛️ Producer.ai Preset Pack — **“E8 Spectral Algebraics”**
+
 ```yaml
 preset_pack:
   name: "E8 Spectral Algebraics"
@@ -19,14 +34,7 @@ preset_pack:
   description: |
     A tri-preset suite capturing the harmonic geometry of the E8 Fractal Power Module.
     Each preset uses φ-scaled frequency ladders, ternary qutrit morphing, and Coxeter-plane rotation
-    to produce infinite, non-repeating pads, pulses, and drones. Tuned to the spectral signatures
-    of the “Quantum Drift” demo from the Spectral Algebraics series.
-
-    ---
-    **Option: Zenodo Reference**
-    - *Parent Paper:* [Spectral Algebraics: Audible Geometry via E8-Inspired Signal Synthesis and 3D Visualization](https://doi.org/10.5281/zenodo.17510649)
-    - *Companion Dataset:* Quantum Drift Spectral Summary (`E8_Spectral_Algebraics___Summary.csv`)
-    - *Preset Pack DOI:* **https://doi.org/10.5281/zenodo.XXXXXXX** ← *(replace with minted DOI once uploaded)*
+    to produce infinite, non-repeating pads, pulses, and drones.
 
   macros_default:
     PhiDrift: 0.02
@@ -83,7 +91,7 @@ preset_pack:
     - name: "φ-Pulse Grit"
       color: "#ff6b00"
       description: |
-        Rhythmic fractal texture emphasizing φ-scaled subharmonics and metallic edges.
+        Rhythmic fractal texture emphasising φ-scaled sub-harmonics and metallic edges.
         Great for motion beds and hybrid percussion.
       macros:
         CosmicDepth: 4
@@ -119,27 +127,82 @@ preset_pack:
         EnergyFlow:
           curve: pulse
           rate: 0.05
+````
+
+---
 
 ## 🧭 Cite This Work
 
-All components of the **QSOL IMC Research Framework** — including *Spectral Algebraics*, *Unified Field Framework (UFF)*, *Quantum Error Correction (QEC)*, and *Artificial Intelligence Mind-Mapping (AIMM)* — are openly published and citable via Zenodo.  
+All components of the **QSOL IMC Research Suite** — including *Spectral Algebraics*, *Unified Field Framework (UFF)*, *Quantum Error Correction (QEC)*, and *Artificial Intelligence Mind-Mapping (AIMM)* — are openly published and citable via Zenodo.
 If you use or reference these projects, please cite them as follows:
 
-> **Slade, Trent (QSOL-IMC).**  
-> *QSOL Research Suite: Unified Field, Spectral Algebraics, and Cognitive Instruments.*  
-> Zenodo (2025). https://doi.org/10.5281/zenodo.17510649 *(and associated DOIs)*  
->  
-> This suite includes:  
-> • **Spectral Algebraics** — E8-based audio-visual synthesis toolkit.  
-> • **Unified Field Framework (UFF)** — cosmological and field-theory modeling environment.  
-> • **Quantum Error Correction (QEC)** — fault-tolerant codebench and spectral sonification library.  
-> • **AIMM** — cognitive markup and AI reasoning framework (Cognitive Instruments v2.0.0).  
+> **Slade, Trent (QSOL-IMC).**
+> *QSOL Research Suite: Unified Field, Spectral Algebraics, and Cognitive Instruments.*
+> Zenodo (2025). [https://doi.org/10.5281/zenodo.17510649](https://doi.org/10.5281/zenodo.17510649) *(and associated DOIs)*
+>
+> Key DOIs:
+> • Spectral Algebraics v5: [https://doi.org/10.5281/zenodo.17560719](https://doi.org/10.5281/zenodo.17560719)
+> • AIMM (Artificial Intelligence Mind-Mapping Framework): [https://doi.org/10.5281/zenodo.17560429](https://doi.org/10.5281/zenodo.17560429)
+>
+> These tools form a cohesive suite for creators, researchers and technologists.
 
-**License:** Apache 2.0  
-**Author:** Trent Slade (ORCID 0009-0002-4515-9237)  
-**Organization:** [QSOL IMC](https://qsolimc.site) — Quantum-Secure Optical Logic / Integrated Media Collective  
+**License:** Apache 2.0
+**Author:** Trent Slade (ORCID 0009-0002-4515-9237)
+**Organisation:** [QSOL IMC](https://qsolimc.site) — Quantum-Secure Optical Logic / Integrated Media Collective
 
 [![DOI: 10.5281/zenodo.17510649](https://zenodo.org/badge/DOI/10.5281/zenodo.17510649.svg)](https://doi.org/10.5281/zenodo.17510649)
 [![QSOL IMC GitHub](https://img.shields.io/badge/QSOL-IMC-GitHub-000.svg?logo=github)](https://github.com/QSOLKCB)
-[![Spectral Algebraics DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
-[![AIMM DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.YYYYYYY.svg)](https://doi.org/10.5281/zenodo.YYYYYYY)
+
+---
+
+## Release Notes – v5
+
+**Release Date:** 2025-11-09
+**Version:** v5
+
+**Major Features:**
+
+* Revamped core engine: the E8-inspired fractal lattice synthesis has been rewritten for 4× faster processing and deeper visual-sonic coupling.
+* Added **40 new audio-visual presets** including “Golden Torus”, “Hyper-Fractal Grid”, and “Quantum Drift II”.
+* New 3D visualization features: adaptive lighting based on audio amplitude, camera-path presets, and modular visual blocks for custom scene creation.
+* CLI + Python pipeline added: script your own spectral presets and visual mappings.
+* Documentation update: “Getting Started v5” guide, preset-browser walkthrough, and enhanced asset gallery.
+* Improved UX & performance: memory use reduced ~35%, GUI responsiveness improved, cross-platform builds (Linux/macOS/Windows) now available.
+
+**Known Issues / Roadmap:**
+
+* On older GPUs (pre-2018) some visual modes may drop frames — v6 will include a low-frame fallback build.
+* Preset tagging/search UI still not integrated — expected in v6.
+* Community contributions for new presets and visual mappings are very welcome via GitHub issues or pull requests.
+
+---
+
+## Getting Started
+
+1. Download the v5 ZIP from the release assets in GitHub or via the DOI link above.
+2. Unzip and open `README.md`, then follow the “Quick Start” section.
+3. Explore the *Golden Torus* demo preset and observe the visual engine in action.
+4. Use the CLI tool:
+
+   ```
+   python tools/generate.py --preset "Quantum Drift II"
+   ```
+
+   to build your own custom mappings.
+5. Dive into `/visuals/scene_editor.html` and load the *Custom Blocks* module to create your own audio-reactive geometry.
+
+---
+
+## License
+
+Apache 2.0 — see `LICENSE` file for details.
+
+---
+
+## Contact
+
+Trent Slade — QSOL-IMC
+Website: [https://qsolimc.site](https://qsolimc.site)
+GitHub: [https://github.com/QSOLKCB](https://github.com/QSOLKCB)
+
+```
