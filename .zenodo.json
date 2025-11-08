@@ -1,10 +1,12 @@
 {
   "upload_type": "software",
+  "resource_type": "software",
   "title": "Spectral Algebraics: Audible Geometry via E8-Inspired Signal Synthesis & 3D Visualization",
   "version": "1.0.0",
+  "publication_date": "2025-11-09",
   "creators": [
     {
-      "name": "Trent Slade",
+      "name": "Slade, Trent",
       "affiliation": "QSOL-IMC",
       "orcid": "0009-0002-4515-9237"
     }
@@ -19,17 +21,19 @@
     "generative geometry",
     "Spectral Algebraics"
   ],
+  "language": "en",
   "related_identifiers": [
     {
-      "identifier": "https://doi.org/10.xxxx/zenodo.xxxxx",
+      "scheme": "doi",
+      "identifier": "10.xxxx/zenodo.xxxxx",
       "relation": "isSupplementTo",
       "resource_type": "publication-article"
     },
     {
+      "scheme": "url",
       "identifier": "https://github.com/QSOLKCB/SPECTRAL",
       "relation": "isHostedBy",
       "resource_type": "software"
     }
-  ],
-  "language": "en"
+  ]
 }
