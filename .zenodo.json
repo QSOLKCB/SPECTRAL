@@ -1,0 +1,35 @@
+{
+  "upload_type": "software",
+  "title": "Spectral Algebraics: Audible Geometry via E8-Inspired Signal Synthesis & 3D Visualization",
+  "version": "1.0.0",
+  "creators": [
+    {
+      "name": "Trent Slade",
+      "affiliation": "QSOL-IMC",
+      "orcid": ""
+    }
+  ],
+  "description": "This release (v1.0.0) of Spectral Algebraics includes the E8 fractal power module, 20 audio presets, full 3D visualization engine, demo assets and documentation. See https://github.com/QSOLKCB/SPECTRAL",
+  "access_right": "open",
+  "license": "Apache-2.0",
+  "keywords": [
+    "E8",
+    "signal synthesis",
+    "audio visualization",
+    "generative geometry",
+    "Spectral Algebraics"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://doi.org/10.xxxx/zenodo.xxxxx",
+      "relation": "isSupplementTo",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "https://github.com/QSOLKCB/SPECTRAL",
+      "relation": "isHostedBy",
+      "resource_type": "software"
+    }
+  ],
+  "language": "en"
+}
