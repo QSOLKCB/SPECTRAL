@@ -1,6 +1,7 @@
-Spectral Algebraics: Audible Geometry via E8-Inspired Signal Synthesis and 3D Visualization
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17560719.svg)](https://doi.org/10.5281/zenodo.17560719)
+Spectral Algebraics v5 – Audible Geometry via E8-Inspired Signal Synthesis & 3D Visualization. Zenodo. https://doi.org/10.5281/zenodo.17560719
 Creators
-Slade, Trent (Researcher)
+Slade, Trent. (2025). (Researcher)
 Description
 This work introduces Spectral Algebraics, a framework uniting high-dimensional symmetry (E8 lattices) with signal synthesis and spatial sonification. By treating sound spectra as algebraic manifolds rather than time-series, the system maps multi-frequency relationships into geometric forms that can be both heard and seen. The implementation combines quantum-error-correction-style encoding, fractal LFO modulation, and real-time 3D visualization to explore the boundary between mathematical structure and perceptual experience.
 The accompanying toolkit demonstrates how algebraic topologies can inform compositional design, bridging abstract group theory and immersive audio-visual production.
