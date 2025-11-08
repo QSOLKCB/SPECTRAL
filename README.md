@@ -119,3 +119,26 @@ preset_pack:
           curve: pulse
           rate: 0.05
 
+## 🧭 Cite This Work
+
+All components of the **QSOL IMC Research Framework** — including *Spectral Algebraics*, *Unified Field Framework (UFF)*, *Quantum Error Correction (QEC)*, and *Artificial Intelligence Mind-Mapping (AIMM)* — are openly published and citable via Zenodo.  
+If you use or reference these projects, please cite them as follows:
+
+> **Slade, Trent (QSOL-IMC).**  
+> *QSOL Research Suite: Unified Field, Spectral Algebraics, and Cognitive Instruments.*  
+> Zenodo (2025). https://doi.org/10.5281/zenodo.17510649 *(and associated DOIs)*  
+>  
+> This suite includes:  
+> • **Spectral Algebraics** — E8-based audio-visual synthesis toolkit.  
+> • **Unified Field Framework (UFF)** — cosmological and field-theory modeling environment.  
+> • **Quantum Error Correction (QEC)** — fault-tolerant codebench and spectral sonification library.  
+> • **AIMM** — cognitive markup and AI reasoning framework (Cognitive Instruments v2.0.0).  
+
+**License:** Apache 2.0  
+**Author:** Trent Slade (ORCID 0009-0002-4515-9237)  
+**Organization:** [QSOL IMC](https://qsolimc.site) — Quantum-Secure Optical Logic / Integrated Media Collective  
+
+[![DOI: 10.5281/zenodo.17510649](https://zenodo.org/badge/DOI/10.5281/zenodo.17510649.svg)](https://doi.org/10.5281/zenodo.17510649)
+[![QSOL IMC GitHub](https://img.shields.io/badge/QSOL-IMC-GitHub-000.svg?logo=github)](https://github.com/QSOLKCB)
+[![Spectral Algebraics DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![AIMM DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.YYYYYYY.svg)](https://doi.org/10.5281/zenodo.YYYYYYY)
