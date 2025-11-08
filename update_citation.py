@@ -35,10 +35,10 @@ def extract_dois_from_zenodo(metadata: Dict) -> List[str]:
         for identifier in metadata['related_identifiers']:
             id_str = identifier.get('identifier', '')
             # Extract DOI from URL or direct DOI string
-            if 'doi.org' in id_str:
-                doi_match = re.search(r'10\.\d+/[^\s]+', id_str)
-                if doi_match:
-                    dois.append(doi_match.group(0))
+            # Use regex to match full DOI URL pattern for security
+            doi_url_match = re.search(r'https?://(?:dx\.)?doi\.org/(10\.\d+/[^\s]+)', id_str)
+            if doi_url_match:
+                dois.append(doi_url_match.group(1))
             elif id_str.startswith('10.'):
                 dois.append(id_str)
     
