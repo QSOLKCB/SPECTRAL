@@ -3,7 +3,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17560719.svg)](https://doi.org/10.5281/zenodo.17560719)
 
 **Spectral Algebraics v5 – Audible Geometry via E8-Inspired Signal Synthesis & 3D Visualization**  
-Zenodo: https://doi.org/10.5281/zenodo.17560719
+[Zenodo: https://doi.org/10.5281/zenodo.17560719](https://github.com/QSOLKCB/SPECTRAL/blob/main/spectral_algebraics.pdf)
 
 ---
 
