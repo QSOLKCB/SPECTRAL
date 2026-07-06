@@ -1,0 +1,4 @@
+File,Purpose,Size
+QSOL-0C57-6874_extended_12s.wav,Upload directly to Suno,2.1 MB
+QSOL-0C57-6874_extended_12s.json,Metadata + provenance,1.4 KB
+extend_qsol_for_suno.py,"Reusable script (generate 8s, 15s, 20s, 30s versions etc.)",—
