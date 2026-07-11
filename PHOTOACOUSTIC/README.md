@@ -2,7 +2,7 @@
 
 **Deterministic light-to-sound modelling and music generation—entirely inside the browser.**
 
-SPECTRAL Photoacoustic Laboratory 2.0 is a zero-install, dependency-free DHTML redesign of `photoacoustic_sonifier.py`. It turns synthetic light signals or local WAV files into reproducible PCM16 audio through an explicit optical → thermal → pressure → cavity model.
+SPECTRAL Photoacoustic Laboratory 2.0 is a zero-install, dependency-free DHTML redesign of the original [`photoacoustic_sonifier.py`](scripts/photoacoustic_sonifier.py). It turns synthetic light signals or local WAV files into reproducible PCM16 audio through an explicit optical → thermal → pressure → cavity model.
 
 The application has no server, localhost process, Python runtime, Node runtime, package manager, build step, CDN, cloud dependency, telemetry, or network request. The browser is the application runtime.
 
@@ -335,7 +335,6 @@ PHOTOACOUSTIC/
   app.js
   README.md
   LICENSE.txt
-  photoacoustic_sonifier.py       # original Python implementation
   js/
     core.js                       # namespace, canonical JSON, SHA-256, strict math
     wav.js                        # RIFF parser, PCM16 writer, resampler, ZIP
@@ -344,6 +343,9 @@ PHOTOACOUSTIC/
     storage.js                    # IndexedDB with session fallback
     visuals.js                    # waveform, FFT spectrogram, stage traces
     ui.js                         # application controller
+  scripts/
+    README.md                     # legacy Python usage and preservation notes
+    photoacoustic_sonifier.py     # original NumPy/SciPy implementation
   tests/
     index.html
     network-guard.js
@@ -363,19 +365,25 @@ Open `tests/index.html` directly. The suite checks:
 - strict integer oscillator quadrants;
 - hand-built PCM16 WAV bytes and hash;
 - WAV parse/write round trips;
+- PCM24 and PCM32 positive-extrema clamping;
+- malformed RIFF boundary and padding rejection;
 - deterministic resampling;
 - material and resonator registry values;
-- invalid resonator rejection;
+- immutable nested preset data;
+- invalid generator, pulse-budget, and resonator rejection;
+- exclusion of unused controls from normalized recipe identity;
 - a frozen end-to-end Canonical Strict golden render;
 - repeated-render byte equality;
 - mutation and mode identity separation;
 - all five original musical mappings;
 - the 25-pair material/resonator matrix;
 - exact manifest replay;
+- source-backed replay and changed-source rejection;
 - tamper rejection;
-- cancellation without artifacts;
-- deterministic ZIP ordering;
+- early and late cancellation without partial artifacts;
+- deterministic ZIP ordering and frozen bundle identity;
 - IndexedDB ArrayBuffer persistence when available;
+- blocked network-attempt monitoring;
 - and absence of remote resources.
 
 For a publication-grade Canonical Strict claim, run the same suite in current Chromium, Firefox, Safari, and Edge releases and compare frozen hashes.
@@ -396,8 +404,39 @@ find PHOTOACOUSTIC -maxdepth 2 -type f \
 Expected result: no production network client, no remote HTML/CSS asset, and no package-manager file.
 
 ## Legacy Python implementation
-Moved To 'PHOTOACOUSTIC/scripts'
-`photoacoustic_sonifier.py` remains useful for command-line generation and for comparing the browser’s Replay Safe character with the original NumPy/SciPy model.
+
+The original Python implementation has moved to [`PHOTOACOUSTIC/scripts/`](scripts/) for preservation and command-line use:
+
+```text
+PHOTOACOUSTIC/scripts/
+  README.md
+  photoacoustic_sonifier.py
+```
+
+The move is organizational only: the original Python source is preserved unchanged. It remains useful for:
+
+- command-line generation;
+- NumPy/SciPy experimentation;
+- reference comparisons;
+- and comparing the browser’s Replay Safe character with the original model.
+
+From the repository root, list its presets with:
+
+```bash
+python3 PHOTOACOUSTIC/scripts/photoacoustic_sonifier.py --list-presets
+```
+
+Generate an example with:
+
+```bash
+python3 PHOTOACOUSTIC/scripts/photoacoustic_sonifier.py \
+  --mode generate \
+  --preset industrial_fib \
+  --duration 30 \
+  --out pa_output.wav
+```
+
+The legacy script requires Python with NumPy, SciPy, and SoundFile. See [`scripts/README.md`](scripts/README.md) for its command-line documentation.
 
 The browser and Python engines should not be expected to produce identical bytes because:
 
@@ -411,6 +450,6 @@ These differences are declared in the recipe instead of being hidden.
 
 ## License
 
-SPECTRAL Photoacoustic Laboratory is distributed under the MIT License. See the repository-root `LICENSE` and `PHOTOACOUSTIC/LICENSE.txt`.
+SPECTRAL Photoacoustic Laboratory is distributed under the MIT License. See the [repository-root license](../LICENSE) and the [Photoacoustic license](LICENSE.txt).
 
 Copyright (c) 2026 Trent Slade (QSOL-IMC).
