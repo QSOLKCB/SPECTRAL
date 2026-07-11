@@ -5,7 +5,7 @@
 [![DOI: Spectral Algebraics](https://zenodo.org/badge/DOI/10.5281/zenodo.21308248.svg)](https://doi.org/10.5281/zenodo.21308248)
 [![DOI: Collective Modes v1.2](https://zenodo.org/badge/DOI/10.5281/zenodo.21293821.svg)](https://doi.org/10.5281/zenodo.21293821)
 [![DOI: Collective Modes v1.0](https://zenodo.org/badge/DOI/10.5281/zenodo.21292906.svg)](https://doi.org/10.5281/zenodo.21292906)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 SPECTRAL is an experimental research and development repository by **Trent Slade / QSOL-IMC**. It explores deterministic and replay-aware mappings between data, symbolic structures, mathematical symmetry, signal synthesis, time-frequency analysis, three-dimensional visualization, and audible perception.
 
@@ -145,7 +145,7 @@ ORCID: [0009-0002-4515-9237](https://orcid.org/0009-0002-4515-9237)
 
 ## License
 
-SPECTRAL is licensed under the [Apache License 2.0](LICENSE). It may be used, modified, distributed, commercialized, and incorporated into software or physical systems subject to the license terms, including preservation of the required notices.
+SPECTRAL is licensed under the [MIT License](LICENSE). It may be used, copied, modified, merged, published, distributed, sublicensed, sold, commercialized, and incorporated into software or physical systems, provided the copyright and permission notices are retained.
 
 ## Status
 
