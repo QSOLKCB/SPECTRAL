@@ -1,0 +1,7 @@
+.test-page { min-height: 100vh; }
+.test-main { max-width: 1280px; margin: 0 auto; padding: 1rem; display: grid; gap: 1rem; }
+.test-hero { min-height: 130px; }
+.test-count { text-align: right; z-index: 1; }.test-count strong { display: block; color: var(--cyan); font: 700 2.2rem ui-monospace,monospace; }.test-count span { color: var(--muted); font-size: .75rem; text-transform: uppercase; }
+.runtime { display: grid; grid-template-columns: 7rem 1fr; gap: 1rem; border-bottom: 1px solid var(--line); padding-bottom: .8rem; color: var(--muted); font: .7rem ui-monospace,monospace; overflow-wrap: anywhere; }
+.test-table { width: 100%; border-collapse: collapse; margin-top: .7rem; font-size: .76rem; }.test-table th,.test-table td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: .7rem; }.test-table th { color: var(--muted); }.test-table td:first-child { width: 5rem; font: 800 .68rem ui-monospace,monospace; }.test-table .pass { color: var(--green); }.test-table .fail { color: var(--red); }.test-table .skip { color: var(--amber); }.test-table pre { white-space: pre-wrap; margin: .3rem 0; color: #dca79f; font-size: .66rem; }
+@media(max-width:680px){.test-table th:nth-child(3),.test-table td:nth-child(3){display:none}.test-count{text-align:left}.test-hero{display:block}}
