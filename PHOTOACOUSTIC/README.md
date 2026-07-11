@@ -396,7 +396,7 @@ find PHOTOACOUSTIC -maxdepth 2 -type f \
 Expected result: no production network client, no remote HTML/CSS asset, and no package-manager file.
 
 ## Legacy Python implementation
-
+Moved To 'PHOTOACOUSTIC/scripts'
 `photoacoustic_sonifier.py` remains useful for command-line generation and for comparing the browser’s Replay Safe character with the original NumPy/SciPy model.
 
 The browser and Python engines should not be expected to produce identical bytes because:
