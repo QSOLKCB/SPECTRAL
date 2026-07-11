@@ -252,7 +252,7 @@ APP/
   README.md
   AGENTS.md
   CLAUDE.md
-  LICENSE-NOTICE.txt
+  LICENSE.txt
   js/
     core/
       namespace.js
@@ -331,4 +331,4 @@ Users are responsible for the rights to any source or derivative file they selec
 
 ## License
 
-The APP source is part of the SPECTRAL repository and is distributed under its Apache License 2.0. See the repository-root `LICENSE` and `APP/LICENSE-NOTICE.txt`.
+The APP source is part of the SPECTRAL repository and is distributed under the MIT License. See the repository-root `LICENSE` and `APP/LICENSE.txt`.
