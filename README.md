@@ -1,15 +1,3 @@
-Absolutely — the root README should now present **SPECTRAL as the full repository**, not merely the original PDF and Producer.ai preset pack.
-
-The repository has grown into three connected layers:
-
-1. **The published Spectral Algebraics paper and Zenodo dataset**
-2. **Python sonification scripts and generated WAV examples in `/E8` and `/SONIFICATION`**
-3. **The browser-native SPECTRAL Deterministic Sonification Workbench 2.0 in `/APP`**
-
-The new Workbench is substantial enough to be the repository’s main entry point: it supports Canonical Strict and Replay Safe determinism, multiple symbolic and data-driven engines, deterministic WAV output, manifests, fingerprints, contracts, lineage records, and offline browser execution.  The Python collection includes E8, astronomical, QEC, triality, fractal, and other sonification generators across the repository.
-
-Here is the complete replacement `README.md`:
-
 ````markdown
 # SPECTRAL
 
@@ -468,13 +456,5 @@ engine version, source hashes, manifest, and observation contract associated
 with a render.
 
 ```
-
-A couple of important fixes are baked into this version:
-
-- The visible Zenodo link now actually leads to **Zenodo**, rather than disguising a GitHub PDF link as a Zenodo URL.
-- The enormous preset YAML no longer overwhelms the landing page; it is linked as its own research artifact.
-- `/APP` is established as the current flagship application.
-- `/E8` and `/SONIFICATION` are retained as the Python research and generation layer.
-- The wording distinguishes **E8-inspired mappings** from claims of exact mathematical or physical representation.
 - The new MIT licensing intention explicitly covers commercial, governmental, embedded, and physical-device use.
 ```
