@@ -49,13 +49,11 @@ def generate_citation_block(metadata: Optional[Dict] = None) -> str:
     """Generate the unified citation block with dynamic metadata."""
     
     # Default values
-    license_text = "Apache 2.0 (unless otherwise noted)"
+    license_text = "MIT"
     
     # Extract metadata if available
     if metadata:
-        license_text = metadata.get('license', 'Apache-2.0').replace('-', ' ')
-        if not license_text.startswith('Apache'):
-            license_text = f"{license_text} (unless otherwise noted)"
+        license_text = metadata.get('license', 'MIT').replace('-', ' ')
     
     # Extract DOIs
     dois = extract_dois_from_zenodo(metadata) if metadata else []
