@@ -1,8 +1,8 @@
 # SPECTRAL Deterministic Sonification Workbench 2.0
 
-**Original deterministic source stems for audible geometry â€” entirely inside the browser.**
+**Original deterministic source stems for audible geometry — entirely inside the browser.**
 
-SPECTRAL 2.0 is a zero-install, dependency-free DHTML application for turning local data, images, byte streams, QEC-style events, and symbolic E8/Ï† engines into reproducible PCM16 WAV files with provenance receipts.
+SPECTRAL 2.0 is a zero-install, dependency-free DHTML application for turning local data, images, byte streams, QEC-style events, and symbolic E8/φ engines into reproducible PCM16 WAV files with provenance receipts.
 
 There is no server, localhost process, Python runtime, Node runtime, package manager, build step, CDN, cloud service, telemetry, or network request. The browser is the application runtime.
 
@@ -67,10 +67,10 @@ The determinism mode is in the domain-separated recipe preimage. Strict and Repl
 | Engine | Canonical Strict | Replay Safe | Purpose |
 |---|---:|---:|---|
 | `omi_xor_ring` | Yes | Yes | XOR/rotation orbits and hard-edged byte-state textures |
-| `e8_cosmovirus` | Yes | Yes | Triality, Ï† lanes, DIAG events, Fibonacci gates, Ouroboros feedback |
-| `e8_bell` | Yes | Yes | Bell-parity phase mappings and rational Ï† harmonic ladders |
+| `e8_cosmovirus` | Yes | Yes | Triality, φ lanes, DIAG events, Fibonacci gates, Ouroboros feedback |
+| `e8_bell` | Yes | Yes | Bell-parity phase mappings and rational φ harmonic ladders |
 | `qec_triality` | Yes | Yes | Numeric/QEC event streams mapped through `[1,-2,1]` triality lanes |
-| `spectral_algebraics` | Yes | Yes | Coxeter/Ï†/qutrit macro synthesis with seeded entropy bloom |
+| `spectral_algebraics` | Yes | Yes | Coxeter/φ/qutrit macro synthesis with seeded entropy bloom |
 | `image_scan` | No | Yes | Luminance, DIAG-edge, and radial pixel scanning |
 | `data_mapper` | Yes | Yes | General CSV, JSON, text-number, and binary mapping |
 
@@ -92,15 +92,15 @@ The local input surface accepts:
 
 Raw source bytes are SHA-256 hashed before rendering. A literal filename, filesystem path, file modification time, UI selection, or wall clock is never part of render identity. The detected input adapter (`tabular`, `json`, `text`, `binary`, or `image`) is identity-bearing because it determines how the same bytes are interpreted. Renaming a source preserves identity when it does not change that detected adapter; changing an extension from, for example, `.bin` to `.txt` intentionally changes the recipe.
 
-Text-like inputs are decoded as UTF-8 and normalized into signed fixed-point integers. The versioned CSV/TSV adapter respects quoted fields and maps only cells that are entirely numeric. The JSON adapter validates the document and maps JSON number tokens while ignoring digits in keys and string labels. Plain text intentionally uses decimal-token extraction. Binary sources expose canonical byte values. Adapter selection is based only on canonical filename-extension rules, never an OS/browser MIME guess. Image Scan uses a nearest-neighbour, bounded Canvas decode for Replay Safe mapping while the raw compressed file hash remains in provenance. If an image is routed into a generic Strict `data_mapper` or `qec_triality` engine, those engines map the raw compressed bytesâ€”not browser-decoded pixels.
+Text-like inputs are decoded as UTF-8 and normalized into signed fixed-point integers. The versioned CSV/TSV adapter respects quoted fields and maps only cells that are entirely numeric. The JSON adapter validates the document and maps JSON number tokens while ignoring digits in keys and string labels. Plain text intentionally uses decimal-token extraction. Binary sources expose canonical byte values. Adapter selection is based only on canonical filename-extension rules, never an OS/browser MIME guess. Image Scan uses a nearest-neighbour, bounded Canvas decode for Replay Safe mapping while the raw compressed file hash remains in provenance. If an image is routed into a generic Strict `data_mapper` or `qec_triality` engine, those engines map the raw compressed bytes—not browser-decoded pixels.
 
 ## Export profiles
 
 | Profile | Rate | Ceiling | Intent |
 |---|---:|---:|---|
-| Archive | 44.1 kHz PCM16 stereo | âˆ’0.70 dBFS | clean preservation and analysis |
-| Suno Seed Export | 48 kHz PCM16 stereo | âˆ’6.00 dBFS | conservative original source-stem headroom |
-| Brutalist | 44.1 kHz PCM16 stereo | âˆ’0.10 dBFS | aggressive local experiments |
+| Archive | 44.1 kHz PCM16 stereo | −0.70 dBFS | clean preservation and analysis |
+| Suno Seed Export | 48 kHz PCM16 stereo | −6.00 dBFS | conservative original source-stem headroom |
+| Brutalist | 44.1 kHz PCM16 stereo | −0.10 dBFS | aggressive local experiments |
 
 **Suno Seed Export is not a detector bypass or copyright-evasion feature.** It is a conservative technical profile for original, user-owned source material. ProvenanceGuard documents generation and local identity; it cannot guarantee that any external platform will accept an upload.
 
@@ -160,13 +160,13 @@ The pipeline has no circular self-hash:
 
 ```text
 source bytes
-  â†’ source hash + normalized recipe
-  â†’ PCM + WAV
-  â†’ PCM/WAV hashes
-  â†’ audio fingerprint + fingerprint hash
-  â†’ observation contract + contract hash
-  â†’ readiness, derivation, origin receipt
-  â†’ manifest envelope
+  → source hash + normalized recipe
+  → PCM + WAV
+  → PCM/WAV hashes
+  → audio fingerprint + fingerprint hash
+  → observation contract + contract hash
+  → readiness, derivation, origin receipt
+  → manifest envelope
 ```
 
 `manifest_core_sha256` hashes the manifest core before that field is added. It is not presented as a hash of a file that contains its own hash.
@@ -222,7 +222,7 @@ The seed contract remains immutable. The derivation graph is also embedded in th
 
 SPECTRAL uses IndexedDB for jobs, presets, contracts, fingerprint records, canonical WAV bytes, and history. PCM payload views and deterministic ZIPs are reconstructed from the one stored WAV plus the receipt documents, avoiding three copies of the same audio in browser quota. The most recent 24 jobs are retained by default, and old jobs are evicted before a new write. A completed render remains playable and downloadable even if persistence fails. Refreshing the same `index.html` retains jobs when the browser permits IndexedDB for local-file origins.
 
-Browser handling of `file://` storage is implementation-dependent. If IndexedDB is rejected, the header displays **STORAGE Â· SESSION ONLY** and the app continues with an explicit in-memory fallback. Moving the APP directory or using a different browser profile may also produce a different local-file storage origin.
+Browser handling of `file://` storage is implementation-dependent. If IndexedDB is rejected, the header displays **STORAGE · SESSION ONLY** and the app continues with an explicit in-memory fallback. Moving the APP directory or using a different browser profile may also produce a different local-file storage origin.
 
 No cookies are created.
 
@@ -325,7 +325,7 @@ Expected result: no application network client, no remote HTML/CSS asset, and no
 
 ## Claim boundaries
 
-Some engines use E8, Ï†, Bell-state, QEC, cosmovirus, biological, mythic, or cosmological terminology as an artistic interface. Unless a source dataset and separate scientific method establish otherwise, those labels are creative symbolic metadata onlyâ€”not biomedical, archaeological, experimental-physics, or scientific proof.
+Some engines use E8, φ, Bell-state, QEC, cosmovirus, biological, mythic, or cosmological terminology as an artistic interface. Unless a source dataset and separate scientific method establish otherwise, those labels are creative symbolic metadata only—not biomedical, archaeological, experimental-physics, or scientific proof.
 
 Users are responsible for the rights to any source or derivative file they select.
 

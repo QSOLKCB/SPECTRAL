@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; connect-src 'none'; img-src 'self' data: blob:; media-src 'self' data: blob:; object-src 'none'; frame-src 'none'; font-src 'self'; script-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>SPECTRAL Deterministic Sonification Workbench 2.0</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <noscript>
+    <div class="fatal-banner">SPECTRAL requires JavaScript. All processing remains local to this browser.</div>
+  </noscript>
+
+  <header class="app-header">
+    <div class="brand-block">
+      <div class="brand-mark" aria-hidden="true">S</div>
+      <div>
+        <h1>SPECTRAL</h1>
+        <p>Deterministic Sonification Workbench <span id="app-version">2.0.0</span></p>
+      </div>
+    </div>
+    <div class="header-status" aria-label="Application status">
+      <span class="status-chip status-local"><span class="status-dot"></span>LOCAL ONLY</span>
+      <span class="status-chip" id="storage-status">STORAGE · CHECKING</span>
+      <span class="status-chip" id="runtime-status">RUNTIME · BROWSER</span>
+    </div>
+  </header>
+
+  <main class="workbench">
+    <aside class="control-rail" aria-label="Render controls">
+      <section class="panel determinism-panel" aria-labelledby="determinism-title">
+        <div class="panel-heading">
+          <div>
+            <span class="eyebrow">01 · SOURCE OF TRUTH</span>
+            <h2 id="determinism-title">Determinism</h2>
+          </div>
+          <button class="icon-button" id="determinism-help" type="button" title="Explain determinism modes" aria-label="Explain determinism modes">?</button>
+        </div>
+        <div class="mode-selector" role="radiogroup" aria-label="Determinism mode">
+          <label class="mode-option selected" data-mode-card="canonical_strict">
+            <input type="radio" name="determinism-mode" value="canonical_strict" checked>
+            <span class="mode-radio" aria-hidden="true"></span>
+            <span>
+              <strong>CANONICAL STRICT</strong>
+              <small>Byte-identical formal rendering</small>
+            </span>
+          </label>
+          <label class="mode-option" data-mode-card="replay_safe">
+            <input type="radio" name="determinism-mode" value="replay_safe">
+            <span class="mode-radio" aria-hidden="true"></span>
+            <span>
+              <strong>REPLAY SAFE</strong>
+              <small>Fast deterministic rendering</small>
+            </span>
+          </label>
+        </div>
+        <p class="mode-contract" id="mode-contract">Fixed-point DSP · canonical PCM16 · pure integer render path</p>
+      </section>
+
+      <section class="panel" aria-labelledby="engine-title">
+        <div class="panel-heading compact">
+          <div>
+            <span class="eyebrow">02 · GENERATOR</span>
+            <h2 id="engine-title">Engine</h2>
+          </div>
+          <span class="version-tag" id="engine-version">v—</span>
+        </div>
+        <label class="field-label" for="engine-select">Engine registry</label>
+        <select id="engine-select"></select>
+        <p class="field-note" id="engine-description"></p>
+        <div class="claim-boundary" id="claim-boundary"></div>
+
+        <div class="subheading-row">
+          <h3>Presets</h3>
+          <button class="text-button" id="save-preset" type="button">SAVE CURRENT</button>
+        </div>
+        <div class="preset-browser" id="preset-browser" role="list"></div>
+
+        <div class="subheading-row">
+          <h3>Parameters</h3>
+          <button class="text-button" id="reset-params" type="button">RESET</button>
+        </div>
+        <div id="parameter-controls" class="parameter-grid"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="input-title">
+        <div class="panel-heading compact">
+          <div>
+            <span class="eyebrow">03 · INPUT</span>
+            <h2 id="input-title">Source Material</h2>
+          </div>
+          <button class="text-button danger-text" id="clear-source" type="button">CLEAR</button>
+        </div>
+        <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Drop a source file or choose a file">
+          <span class="drop-icon" aria-hidden="true">⇩</span>
+          <strong>DROP SOURCE FILE</strong>
+          <span>CSV · JSON · TXT · BIN · PNG · JPEG · WEBP</span>
+          <button type="button" class="secondary-button" id="choose-source">CHOOSE FILE</button>
+          <input id="source-file" type="file" hidden accept=".csv,.json,.txt,.bin,.dat,.png,.jpg,.jpeg,.webp,application/json,text/*,image/png,image/jpeg,image/webp,application/octet-stream">
+        </div>
+        <div class="source-summary" id="source-summary">
+          <span>NO EXTERNAL SOURCE</span>
+          <small>Engine seed data will be used.</small>
+        </div>
+        <details class="paste-panel">
+          <summary>Paste text, CSV, JSON, or QEC events</summary>
+          <textarea id="pasted-source" rows="5" spellcheck="false" placeholder="Paste local source data here…"></textarea>
+          <button type="button" class="secondary-button" id="use-pasted-source">USE PASTED DATA</button>
+        </details>
+      </section>
+
+      <section class="panel" aria-labelledby="render-title">
+        <div class="panel-heading compact">
+          <div>
+            <span class="eyebrow">04 · RENDER</span>
+            <h2 id="render-title">Render Contract</h2>
+          </div>
+        </div>
+        <div class="two-column-fields">
+          <label>
+            <span class="field-label">Seed</span>
+            <input id="seed-input" type="text" value="SPECTRAL-001" maxlength="128" autocomplete="off">
+          </label>
+          <label>
+            <span class="field-label">Mutation</span>
+            <input id="mutation-input" type="number" value="0" min="0" max="4294967295" step="1">
+          </label>
+          <label>
+            <span class="field-label">Duration</span>
+            <div class="unit-field"><input id="duration-input" type="number" value="8" min="1" max="60" step="1"><span>s</span></div>
+          </label>
+          <label>
+            <span class="field-label">Export profile</span>
+            <select id="profile-select"></select>
+          </label>
+        </div>
+        <button id="render-button" class="render-button" type="button">
+          <span>RENDER SOURCE STEM</span>
+          <small id="render-mode-label">CANONICAL STRICT</small>
+        </button>
+        <div class="render-utility-row">
+          <button id="replay-manifest-button" class="secondary-button" type="button">REPLAY MANIFEST</button>
+          <button id="cancel-render-button" class="secondary-button cancel-button" type="button" hidden>CANCEL</button>
+          <span>Verifies source + exact engine contract</span>
+          <input id="replay-manifest-file" type="file" hidden accept=".json,application/json">
+        </div>
+        <div class="render-progress" id="render-progress" hidden>
+          <div class="progress-track"><span id="render-progress-bar"></span></div>
+          <span id="render-progress-label">Preparing deterministic contract…</span>
+        </div>
+      </section>
+    </aside>
+
+    <section class="main-stage" aria-label="Analysis and output">
+      <div id="startup-notice" class="notice-bar">
+        <span class="notice-symbol">i</span>
+        <p><strong>Zero-install runtime.</strong> Opened directly from disk. No source data or generated artifact leaves this browser.</p>
+        <button type="button" class="icon-button" id="dismiss-notice" aria-label="Dismiss notice">×</button>
+      </div>
+
+      <section class="panel visualization-panel" aria-labelledby="visual-title">
+        <div class="panel-heading visualization-heading">
+          <div>
+            <span class="eyebrow">SIGNAL ANALYSIS</span>
+            <h2 id="visual-title">Waveform + Spectrogram</h2>
+          </div>
+          <div class="analysis-toolbar">
+            <label>FFT
+              <select id="fft-size">
+                <option value="256">256</option>
+                <option value="512" selected>512</option>
+                <option value="1024">1024</option>
+                <option value="2048">2048</option>
+              </select>
+            </label>
+            <label>Frequency
+              <select id="frequency-scale">
+                <option value="log" selected>LOG</option>
+                <option value="linear">LINEAR</option>
+              </select>
+            </label>
+            <button class="toolbar-button" id="reset-view" type="button">RESET VIEW</button>
+          </div>
+        </div>
+
+        <div class="canvas-stack">
+          <div class="canvas-frame waveform-frame">
+            <div class="canvas-label"><span>WAVEFORM</span><span id="waveform-range">0.000 — 0.000 s</span></div>
+            <canvas id="waveform-canvas" width="1200" height="230" aria-label="Rendered waveform"></canvas>
+            <div class="empty-canvas" id="waveform-empty">RENDER A SOURCE STEM TO BEGIN ANALYSIS</div>
+          </div>
+          <div class="canvas-frame spectrogram-frame">
+            <div class="canvas-label"><span>SPECTROGRAM</span><span id="spectrogram-meta">FFT 512 · LOG Hz</span></div>
+            <canvas id="spectrogram-canvas" width="1200" height="310" aria-label="Rendered spectrogram"></canvas>
+            <div class="empty-canvas" id="spectrogram-empty">SPECTRAL FIELD AWAITING PCM</div>
+          </div>
+        </div>
+        <div class="visual-help">
+          <span>WHEEL · ZOOM</span>
+          <span>DRAG · PAN</span>
+          <span>SHIFT + DRAG · SELECT</span>
+          <span id="selection-readout">SELECTION · NONE</span>
+        </div>
+      </section>
+
+      <section class="panel transport-panel" aria-labelledby="transport-title">
+        <div class="transport-grid">
+          <div>
+            <span class="eyebrow">LOCAL PLAYBACK</span>
+            <h2 id="transport-title">Transport</h2>
+            <p class="transport-title" id="current-render-name">No render loaded</p>
+          </div>
+          <audio id="audio-player" controls preload="metadata"></audio>
+          <label class="toggle-control"><input id="loop-toggle" type="checkbox"><span></span>LOOP</label>
+          <div class="ab-controls" aria-label="A/B comparison">
+            <button id="assign-a" class="toolbar-button" type="button">SET A</button>
+            <button id="play-a" class="ab-button" type="button" disabled>A <small>EMPTY</small></button>
+            <button id="assign-b" class="toolbar-button" type="button">SET B</button>
+            <button id="play-b" class="ab-button" type="button" disabled>B <small>EMPTY</small></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="output-grid">
+        <article class="panel output-card hash-card">
+          <div class="panel-heading compact">
+            <div><span class="eyebrow">IDENTITY</span><h2>Canonical Hashes</h2></div>
+            <button class="text-button" id="copy-hashes" type="button" disabled>COPY</button>
+          </div>
+          <dl class="hash-list" id="hash-list">
+            <div><dt>PCM SHA-256</dt><dd>—</dd></div>
+            <div><dt>WAV SHA-256</dt><dd>—</dd></div>
+            <div><dt>CONTRACT</dt><dd>—</dd></div>
+            <div><dt>FINGERPRINT</dt><dd>—</dd></div>
+          </dl>
+        </article>
+
+        <article class="panel output-card readiness-card">
+          <div class="panel-heading compact">
+            <div><span class="eyebrow">PROVENANCEGUARD</span><h2>Upload Readiness</h2></div>
+            <span class="readiness-badge neutral" id="readiness-badge">NOT RENDERED</span>
+          </div>
+          <ul class="check-list" id="readiness-checks">
+            <li><span>○</span> Awaiting an original local render</li>
+          </ul>
+          <p class="legal-note">Documents original generation and local uniqueness. It cannot guarantee acceptance by an external platform.</p>
+        </article>
+
+        <article class="panel output-card metrics-card">
+          <div class="panel-heading compact">
+            <div><span class="eyebrow">MEASUREMENT</span><h2>Fingerprint</h2></div>
+          </div>
+          <div class="metric-grid" id="metric-grid">
+            <div><span>PEAK</span><strong>—</strong></div>
+            <div><span>RMS</span><strong>—</strong></div>
+            <div><span>DC OFFSET</span><strong>—</strong></div>
+            <div><span>ZERO CROSS</span><strong>—</strong></div>
+            <div><span>STEREO CORR.</span><strong>—</strong></div>
+            <div><span>DURATION</span><strong>—</strong></div>
+          </div>
+        </article>
+
+        <article class="panel output-card download-card">
+          <div class="panel-heading compact">
+            <div><span class="eyebrow">ARTIFACTS</span><h2>Downloads</h2></div>
+          </div>
+          <div class="download-grid" id="download-grid">
+            <button type="button" data-artifact="audio" disabled><span>WAV</span><strong>audio.wav</strong></button>
+            <button type="button" data-artifact="manifest" disabled><span>JSON</span><strong>manifest.json</strong></button>
+            <button type="button" data-artifact="fingerprint" disabled><span>JSON</span><strong>fingerprint.json</strong></button>
+            <button type="button" data-artifact="readiness" disabled><span>JSON</span><strong>upload_readiness.json</strong></button>
+            <button type="button" data-artifact="derivation" disabled><span>JSON</span><strong>derivation_graph.json</strong></button>
+            <button type="button" data-artifact="origin" disabled><span>TXT</span><strong>README_ORIGIN.txt</strong></button>
+            <button class="bundle-button" type="button" data-artifact="bundle" disabled><span>ZIP</span><strong>PROVENANCE BUNDLE</strong></button>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel inspector-panel" aria-labelledby="inspector-title">
+        <div class="panel-heading">
+          <div><span class="eyebrow">RENDER RECEIPT</span><h2 id="inspector-title">Manifest + Contract Inspector</h2></div>
+          <div class="tab-list" role="tablist">
+            <button class="tab-button active" data-inspector-tab="manifest" type="button">MANIFEST</button>
+            <button class="tab-button" data-inspector-tab="contract" type="button">CONTRACT</button>
+            <button class="tab-button" data-inspector-tab="runtime" type="button">RUNTIME</button>
+          </div>
+        </div>
+        <pre id="inspector-content" tabindex="0">{
+  "status": "awaiting_render",
+  "network": "disabled",
+  "identity_source": "generated WAV bytes"
+}</pre>
+      </section>
+
+      <section class="panel lineage-panel" aria-labelledby="lineage-title">
+        <div class="panel-heading">
+          <div><span class="eyebrow">DERIVATIVE DOCUMENTATION</span><h2 id="lineage-title">Lineage</h2></div>
+          <span class="version-tag">LOCAL HASH LINK</span>
+        </div>
+        <div class="lineage-layout">
+          <div class="lineage-node source-node">
+            <span>SOURCE SEED</span>
+            <strong id="lineage-source-name">No rendered source selected</strong>
+            <small id="lineage-source-hash">—</small>
+          </div>
+          <div class="lineage-arrow" aria-hidden="true">→</div>
+          <div class="lineage-node derivative-node" id="derivative-drop">
+            <span>DERIVATIVE TRACK</span>
+            <strong id="derivative-name">Choose local WAV / MP3 / audio file</strong>
+            <small id="derivative-hash">Nothing is uploaded.</small>
+            <input id="derivative-file" type="file" hidden accept="audio/*,.wav,.mp3,.flac,.ogg,.m4a">
+            <button type="button" class="secondary-button" id="choose-derivative">CHOOSE TRACK</button>
+          </div>
+        </div>
+        <div class="lineage-fields">
+          <label><span class="field-label">Relationship</span><select id="relationship-select"><option>User arrangement / production</option><option>AI-assisted musical expansion</option><option>Remix / edit</option><option>Mastered derivative</option><option>Other documented derivative</option></select></label>
+          <label><span class="field-label">Notes</span><input id="lineage-notes" type="text" placeholder="Optional local provenance note"></label>
+          <button id="save-lineage" type="button" class="secondary-button" disabled>SAVE LINEAGE</button>
+        </div>
+      </section>
+
+      <section class="panel history-panel" aria-labelledby="history-title">
+        <div class="panel-heading">
+          <div><span class="eyebrow">INDEXEDDB</span><h2 id="history-title">Job History</h2></div>
+          <div class="history-actions"><span id="history-count">0 JOBS</span><button class="text-button danger-text" id="clear-history" type="button">CLEAR HISTORY</button></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>JOB</th><th>ENGINE</th><th>MODE</th><th>PROFILE</th><th>DURATION</th><th>WAV IDENTITY</th><th>LOCAL DATE</th><th></th></tr></thead>
+            <tbody id="history-body"><tr class="empty-row"><td colspan="8">No local jobs have been rendered.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="warning-strip" aria-label="Claim boundary warning">
+        <strong>CLAIM BOUNDARY</strong>
+        <p>SPECTRAL symbolic engines generate creative mathematical audio. Symbolic references are not biomedical, archaeological, or scientific proof.</p>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <span>SPECTRAL 2.0 · QSOL-IMC</span>
+    <span>NO SERVER · NO NETWORK · NO TELEMETRY · NO COOKIES</span>
+    <a href="tests/index.html" target="_blank" rel="noopener">RUN SELF-TESTS</a>
+  </footer>
+
+  <dialog id="mode-dialog">
+    <form method="dialog">
+      <div class="dialog-heading"><h2>Two identities. Two contracts.</h2><button value="close" aria-label="Close">×</button></div>
+      <div class="dialog-mode-grid">
+        <article><span>CANONICAL STRICT</span><p>Uses fixed-point synthesis, integer phase accumulators, explicit PCM16 quantization, canonical JSON, and a versioned pure-JavaScript SHA-256 path. Generated bytes are the identity.</p></article>
+        <article><span>REPLAY SAFE</span><p>Uses deterministic floating-point DSP for faster creative iteration. The browser/runtime fingerprint is recorded with the receipt.</p></article>
+      </div>
+      <p>Determinism mode is included in seed derivation and contract hashing. A mode change can never retain the same SPECTRAL identity.</p>
+    </form>
+  </dialog>
+
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script defer src="js/core/namespace.js"></script>
+  <script defer src="js/core/canonical.js"></script>
+  <script defer src="js/core/input.js"></script>
+  <script defer src="js/audio/dsp.js"></script>
+  <script defer src="js/audio/wav.js"></script>
+  <script defer src="js/audio/zip.js"></script>
+  <script defer src="js/engines/registry.js"></script>
+  <script defer src="js/engines/symbolic.js"></script>
+  <script defer src="js/engines/data.js"></script>
+  <script defer src="js/provenance/artifacts.js"></script>
+  <script defer src="js/storage/database.js"></script>
+  <script defer src="js/ui/waveform.js"></script>
+  <script defer src="js/ui/spectrogram.js"></script>
+  <script defer src="js/ui/workbench.js"></script>
+  <script defer src="app.js"></script>
+</body>
+</html>
