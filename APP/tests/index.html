@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; connect-src 'none'; img-src 'self' data: blob:; media-src 'self' data: blob:; object-src 'none'; frame-src 'none'; font-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <title>SPECTRAL 2.0 Browser Self-Tests</title>
+  <style>
+    :root{color-scheme:dark;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#0b0d0f;color:#e5e9ec}body{max-width:1050px;margin:0 auto;padding:24px}h1{font-size:20px;letter-spacing:.08em}p{color:#929ba4;font:12px/1.6 system-ui,sans-serif}.summary{display:flex;gap:10px;margin:20px 0}.chip{padding:7px 10px;border:1px solid #39434b;background:#15191d;font-size:11px}.running{color:#d7a447}.pass{color:#78ab83}.fail{color:#ca7168}table{width:100%;border-collapse:collapse;background:#121619;border:1px solid #2b333a}th,td{padding:10px;border-bottom:1px solid #2b333a;text-align:left;font-size:11px}th{color:#929ba4}td:nth-child(1){width:80px;font-weight:700}pre{white-space:pre-wrap;color:#ca7168;margin:0;font-size:10px}a{color:#d7a447}footer{margin-top:18px;color:#626c75;font-size:10px}
+  </style>
+</head>
+<body>
+  <h1>SPECTRAL 2.0 · BROWSER SELF-TESTS</h1>
+  <p>This page exercises the exact production scripts through <code>file://</code>. It makes no network requests and does not require a server, package manager, or test framework.</p>
+  <div class="summary"><span class="chip running" id="status">RUNNING</span><span class="chip" id="counts">0 / 0</span><span class="chip" id="runtime">BROWSER</span></div>
+  <table><thead><tr><th>STATUS</th><th>TEST</th><th>DETAIL</th></tr></thead><tbody id="results"></tbody></table>
+  <p><a href="../index.html">← Return to workbench</a></p>
+  <footer>No fixtures are loaded from the network. Golden vectors are embedded in this test runner.</footer>
+
+  <script defer src="../js/core/namespace.js"></script>
+  <script defer src="../js/core/canonical.js"></script>
+  <script defer src="../js/core/input.js"></script>
+  <script defer src="../js/audio/dsp.js"></script>
+  <script defer src="../js/audio/wav.js"></script>
+  <script defer src="../js/audio/zip.js"></script>
+  <script defer src="../js/engines/registry.js"></script>
+  <script defer src="../js/engines/symbolic.js"></script>
+  <script defer src="../js/engines/data.js"></script>
+  <script defer src="../js/provenance/artifacts.js"></script>
+  <script defer src="../js/storage/database.js"></script>
+  <script defer src="test-runner.js"></script>
+</body>
+</html>
