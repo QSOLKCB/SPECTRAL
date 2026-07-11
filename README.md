@@ -1,190 +1,152 @@
-Spectral Algebraics Publication
+# SPECTRAL
 
-Spectral Algebraics: Audible Geometry via E8-Inspired Signal Synthesis and
-3D Visualization
+**Deterministic sonification, audible geometry, spectral analysis, and reproducible source-stem generation.**
 
-Author: Trent Slade
-Affiliation: QSOL-IMC / LostSound Technologies
-ORCID: 0009-0002-4515-9237
+[![DOI: Spectral Algebraics](https://zenodo.org/badge/DOI/10.5281/zenodo.21308248.svg)](https://doi.org/10.5281/zenodo.21308248)
+[![DOI: Collective Modes v1.2](https://zenodo.org/badge/DOI/10.5281/zenodo.21293821.svg)](https://doi.org/10.5281/zenodo.21293821)
+[![DOI: Collective Modes v1.0](https://zenodo.org/badge/DOI/10.5281/zenodo.21292906.svg)](https://doi.org/10.5281/zenodo.21292906)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-The original work explores mappings between E8-inspired algebraic structures,
-algorithmic signal synthesis, time-frequency analysis, and three-dimensional
-visualization.
+SPECTRAL is an experimental research and development repository by **Trent Slade / QSOL-IMC**. It explores deterministic and replay-aware mappings between data, symbolic structures, mathematical symmetry, signal synthesis, time-frequency analysis, three-dimensional visualization, and audible perception.
 
-Generated waveforms are analysed through short-time Fourier transforms.
-Amplitude is represented as spatial topology, while instantaneous phase can
-be mapped into colour. The resulting visual and sonic structures provide an
-experimental form of audible geometry in which mathematical mappings may
-be inspected through both sound and visualization.
+The repository combines a zero-install browser workbench with Python research scripts, reproducible audio artifacts, visualization experiments, and provenance-oriented workflows.
 
-Paper
-Read the PDF
-Open the Zenodo record
-Dataset
+## Project areas
 
-The Zenodo record includes research materials associated with the
-publication, including combinations of:
+| Area | Description |
+|---|---|
+| [APP](APP/) | Browser-native **SPECTRAL Deterministic Sonification Workbench 2.0**. Open `APP/index.html` directly—no server, Node, npm, build system, or network connection required. Supports Canonical Strict and Replay Safe determinism modes, WAV export, fingerprints, manifests, hashes, and derivative-lineage documentation. |
+| [E8](E8/) | E8-inspired signal generators, astronomical-data sonification, triality/φ mappings, QEC-oriented event mapping, WAV material, and experimental visualization code. |
+| [OMI-ISA](OMI-ISA/) | OMI/XOR/E8 sonification experiments, including XOR-ring and fractal-cosmovirus mappings. |
+| [PHOTOACOUSTIC](PHOTOACOUSTIC/) | A simplified deterministic photoacoustic sonifier and music generator that maps modulated light intensity through thermal and resonator models. See the [PHOTOACOUSTIC README](PHOTOACOUSTIC/README.md). |
+| [SONIFICATION](SONIFICATION/) | Scripts, datasets, audio, figures, and supporting material associated with the receipt-bound deterministic information-lattice sonification research cited below. |
 
-the paper;
-demonstration audio;
-WAV and compressed listening examples;
-spectral-analysis data;
-spectrogram imagery;
-preset definitions;
-and supporting documentation.
-Repository Structure
-SPECTRAL/
-├── APP/                    # Browser-native Workbench 2.0
-│   ├── index.html
-│   ├── app.js
-│   ├── style.css
-│   ├── js/
-│   ├── tests/
-│   └── README.md
-│
-├── E8/                     # E8-inspired Python generators and WAV material
-├── SONIFICATION/           # General sonification scripts and experiments
-├── OMI-ISA/                # OMI/XOR/E8 sonification experiments
-├── PHOTOACOUSTIC/          # Photoacoustic sonification work
-├── spectral_algebraics.pdf # Published paper
-├── LICENSE.txt
-└── README.md
+## Quick start
 
-The exact collection will continue to evolve as new engines, datasets,
-fixtures, analyses, and deterministic render profiles are added.
+### Browser workbench
 
-Quick Start
-Browser-native workflow
+```bash
 git clone https://github.com/QSOLKCB/SPECTRAL.git
 cd SPECTRAL
+```
 
-Then open:
+Open:
 
+```text
 APP/index.html
+```
 
-No local server is necessary.
+For the browser-native known-answer tests, open:
 
-Python workflow
+```text
+APP/tests/index.html
+```
 
-Clone the repository and inspect the selected script:
+See [APP/README.md](APP/README.md) for the determinism contracts, engine registry, supported inputs, export profiles, provenance artifacts, replay workflow, privacy model, and acceptance tests.
 
-git clone https://github.com/QSOLKCB/SPECTRAL.git
-cd SPECTRAL
+### Python experiments
+
+Scripts have experiment-specific dependencies. Inspect the selected script before running it; commonly used packages include NumPy, SciPy, Matplotlib, Plotly, and SoundFile.
+
+Example:
+
+```bash
 python3 E8/e8_triality_fractal_sonifier.py
+```
 
-Some scripts may require packages such as NumPy, SciPy, Matplotlib, Plotly,
-or audio-writing libraries. Requirements are script-specific rather than
-defined as a single repository-wide environment.
+## Reproducibility
 
-Research Scope and Claim Boundary
+SPECTRAL prioritizes:
 
-SPECTRAL investigates deterministic and replay-aware mappings between:
+- deterministic or explicitly replay-scoped synthesis;
+- inspectable data-to-sound mappings;
+- canonical hashes and provenance manifests;
+- versioned engines and render contracts;
+- reproducible PCM/WAV artifacts;
+- clear separation between source artifacts and creative derivatives;
+- explicit scientific and symbolic claim boundaries.
 
-numerical data;
-symbolic structures;
-signal synthesis;
-spectral analysis;
-mathematical symmetry;
-error-correction-style event streams;
-visual geometry;
-and audible perception.
+When citing or archiving a generated artifact, retain its application version, engine version, normalized parameters, source hash, recipe or manifest, contract hash, and determinism mode whenever available.
 
-Terms such as E8-inspired, Coxeter-inspired, qutrit, triality,
-and quantum-error-correction-style describe the mathematical or symbolic
-structures used by individual mappings.
+## Research scope and claim boundary
 
-Unless an experiment explicitly demonstrates otherwise, these terms should
-not be interpreted as claims that generated audio constitutes a physical
-quantum computation, an exact representation of the complete E8 Lie group,
-or empirical evidence for a physical theory.
+Terms such as *E8-inspired*, *Coxeter-inspired*, *triality*, *qutrit*, *Bell-state*, and *quantum-error-correction-style* describe mathematical, computational, or symbolic structures used by individual mappings.
 
-SPECTRAL prioritizes reproducibility, transparent mappings, explicit claim
-boundaries, and inspectable artifacts.
+Unless a specific experiment supplies and validates a separate physical method, these terms do **not** claim that generated audio performs physical quantum computation, exactly represents the complete E8 Lie group, proves a biomedical or cosmological hypothesis, or provides empirical evidence for a physical theory.
 
-Applications
+## Publications and datasets
 
-Potential applications include:
+### Spectral Algebraics
 
-scientific and engineering data sonification;
-deterministic source-stem generation;
-accessibility-oriented data representation;
-QEC event-stream monitoring;
-anomaly and pattern exploration;
-mathematical and educational visualization;
-generative audio research;
-provenance-aware creative production;
-embedded sonification systems;
-laboratory instruments;
-museum and installation systems;
-and physical hardware implementations.
-Preset Pack
+[![DOI: 10.5281/zenodo.21308248](https://zenodo.org/badge/DOI/10.5281/zenodo.21308248.svg)](https://doi.org/10.5281/zenodo.21308248)
 
-The original Producer.ai preset specification is retained as:
+The primary publication dataset for the E8-inspired audible-geometry, signal-synthesis, spectral-analysis, and 3D-visualization work.
 
-E8_Spectral_Algebraics_PresetPack.md
+> Slade, T. (2026). *Spectral Algebraics: Audible Geometry via E8-Inspired Signal Synthesis and 3D Visualization* [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.21308248
 
-It documents the experimental E8 Spectral Algebraics tri-preset concept,
-including:
+The repository includes the paper as [spectral_algebraics.pdf](spectral_algebraics.pdf), together with related code, presets, analysis material, and demonstration artifacts.
 
-Coxeter Orbit;
-φ-Pulse Grit;
-and E8 Pad Swell.
+### Collective Modes and Receipt-Bound Sonification
 
-The preset document is a conceptual and production artifact. The current
-browser Workbench implements its own versioned engines, parameters, render
-contracts, and export pipeline.
+The [SONIFICATION](SONIFICATION/) materials accompany the following archived versions:
 
-Citation
-Plain text
-Slade, Trent. Spectral Algebraics: Audible Geometry via E8-Inspired
-Signal Synthesis and 3D Visualization. QSOL-IMC, 2026.
-https://doi.org/10.5281/zenodo.21308248
-BibTeX
+[![DOI: v1.2](https://zenodo.org/badge/DOI/10.5281/zenodo.21293821.svg)](https://doi.org/10.5281/zenodo.21293821)
+
+> Slade, T. (2026). *Collective Modes, Stable Supports, and Observation-Dark Subspaces in Deterministic Information Lattices: Graph Dynamics and a Reproducible Protocol for Receipt-Bound Sonification* (Version v1.2). Zenodo. https://doi.org/10.5281/zenodo.21293821
+
+[![DOI: v1.0](https://zenodo.org/badge/DOI/10.5281/zenodo.21292906.svg)](https://doi.org/10.5281/zenodo.21292906)
+
+> Slade, T. (2026). *Collective Modes, Stable Supports, and Observation-Dark Subspaces in Deterministic Information Lattices: Graph Dynamics and a Reproducible Protocol for Receipt-Bound Sonification* (Version v1.0). Zenodo. https://doi.org/10.5281/zenodo.21292906
+
+For new citations, prefer **v1.2** unless reproducing or discussing the earlier v1.0 release specifically.
+
+## BibTeX
+
+```bibtex
 @dataset{slade_spectral_algebraics_2026,
-  author       = {Slade, Trent},
-  title        = {Spectral Algebraics: Audible Geometry via E8-Inspired
-                  Signal Synthesis and 3D Visualization},
-  year         = {2026},
-  publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.21308248},
-  url          = {https://doi.org/10.5281/zenodo.21308248}
+  author    = {Slade, Trent},
+  title     = {Spectral Algebraics: Audible Geometry via E8-Inspired Signal Synthesis and 3D Visualization},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.21308248},
+  url       = {https://doi.org/10.5281/zenodo.21308248}
 }
 
-When citing a particular generated artifact, also retain its SPECTRAL
-manifest, engine version, recipe identifier, and contract hash where
-available.
+@misc{slade_collective_modes_v12_2026,
+  author    = {Slade, Trent},
+  title     = {Collective Modes, Stable Supports, and Observation-Dark Subspaces in Deterministic Information Lattices: Graph Dynamics and a Reproducible Protocol for Receipt-Bound Sonification},
+  year      = {2026},
+  version   = {v1.2},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.21293821},
+  url       = {https://doi.org/10.5281/zenodo.21293821}
+}
 
-Creator
+@misc{slade_collective_modes_v10_2026,
+  author    = {Slade, Trent},
+  title     = {Collective Modes, Stable Supports, and Observation-Dark Subspaces in Deterministic Information Lattices: Graph Dynamics and a Reproducible Protocol for Receipt-Bound Sonification},
+  year      = {2026},
+  version   = {v1.0},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.21292906},
+  url       = {https://doi.org/10.5281/zenodo.21292906}
+}
+```
 
-Trent Slade
-QSOL-IMC
-ORCID: 0009-0002-4515-9237
+## Applications
 
-License
+Potential uses include scientific and engineering data sonification, accessibility-oriented data representation, deterministic source-stem generation, anomaly exploration, QEC-style event-stream monitoring, mathematical education, generative-audio research, provenance-aware creative production, installations, laboratory instruments, embedded systems, and physical devices.
 
-SPECTRAL is released under the MIT License.
+## Creator
 
-You may use, copy, modify, merge, publish, distribute, sublicense, sell,
-commercialize, or incorporate the software into proprietary software,
-embedded systems, scientific instruments, and physical devices, provided
-that the required copyright and permission notice is retained.
+**Trent Slade**  
+QSOL-IMC / LostSound Technologies  
+ORCID: [0009-0002-4515-9237](https://orcid.org/0009-0002-4515-9237)
 
-See LICENSE.txt.
+## License
 
-Licensing Philosophy
+SPECTRAL is licensed under the [Apache License 2.0](LICENSE). It may be used, modified, distributed, commercialized, and incorporated into software or physical systems subject to the license terms, including preservation of the required notices.
 
-SPECTRAL is licensed permissively to encourage scientific, educational,
-creative, industrial, commercial, and governmental adoption.
+## Status
 
-The project may be incorporated into software, hardware, embedded devices,
-research infrastructure, and manufactured systems while preserving
-attribution to the original author.
-
-Status
-
-SPECTRAL is an active experimental research and development repository.
-
-Interfaces, engines, schemas, presets, and research claims may evolve.
-For archival or publication use, retain the exact application version,
-engine version, source hashes, manifest, and observation contract associated
-with a render.
+SPECTRAL is active experimental research software. Interfaces, engines, schemas, presets, and research claims may evolve. For archival work, use the cited Zenodo records and retain the exact versions and provenance artifacts associated with each render.
