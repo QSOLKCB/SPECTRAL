@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'none'; frame-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>SPECTRAL Photoacoustic 2.0 · Self-Tests</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="test-style.css">
+</head>
+<body class="test-page">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark"><span></span><span></span><span></span></div><div><p class="eyebrow">SPECTRAL / PHOTOACOUSTIC 2.0</p><h1>BROWSER-NATIVE KNOWN-ANSWER SUITE</h1></div></div>
+    <div class="status-cluster"><span id="status" class="status-chip">RUNNING</span><a class="status-chip link" href="../index.html">RETURN TO LAB</a></div>
+  </header>
+  <main class="test-main">
+    <section class="hero-panel test-hero"><div><p class="eyebrow">NO SERVER · NO TEST FRAMEWORK · NO NETWORK</p><h2>Determinism and acceptance checks</h2><p>The production scripts below are loaded directly from the same folder used by the instrument.</p></div><div class="test-count"><strong id="counts">0 / 0</strong><span>checks passed</span></div></section>
+    <section class="panel"><div class="runtime"><strong>Runtime</strong><span id="runtime"></span></div><table class="test-table"><thead><tr><th>Result</th><th>Check</th><th>Detail</th></tr></thead><tbody id="results"></tbody></table></section>
+  </main>
+  <script defer src="network-guard.js"></script>
+  <script defer src="../js/core.js"></script>
+  <script defer src="../js/wav.js"></script>
+  <script defer src="../js/model.js"></script>
+  <script defer src="../js/provenance.js"></script>
+  <script defer src="../js/storage.js"></script>
+  <script defer src="test-runner.js"></script>
+</body>
+</html>
