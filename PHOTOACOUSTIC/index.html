@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'none'; frame-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>SPECTRAL Photoacoustic Laboratory 2.0</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#analysis-stage">Skip to analysis stage</a>
+  <noscript><div class="fatal-notice">JavaScript is required. This application runs locally in your browser and cannot operate while scripting is disabled.</div></noscript>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div>
+        <p class="eyebrow">SPECTRAL / OPTICAL–THERMAL AUDIO</p>
+        <h1>PHOTOACOUSTIC LABORATORY <b>2.0</b></h1>
+      </div>
+    </div>
+    <div class="status-cluster" aria-label="Application status">
+      <span class="status-chip ok" id="offline-status">OFFLINE · LOCAL</span>
+      <span class="status-chip" id="storage-status">STORAGE · CHECKING</span>
+      <a class="status-chip link" href="tests/index.html">SELF-TESTS</a>
+    </div>
+  </header>
+
+  <div class="notice-bar">
+    <strong>SIMPLIFIED MODEL</strong>
+    <span>This is an audio-rate photoacoustic simulation and creative instrument—not a calibrated physical transducer, medical device, or experimental measurement.</span>
+  </div>
+
+  <main class="workspace">
+    <aside class="control-rack" aria-label="Render controls">
+      <section class="panel">
+        <div class="panel-heading"><span>01</span><h2>Render contract</h2></div>
+        <label class="field">
+          <span>Determinism mode</span>
+          <select id="mode">
+            <option value="canonical-strict">Canonical Strict</option>
+            <option value="replay-safe">Replay Safe</option>
+          </select>
+        </label>
+        <p class="field-note" id="mode-note"></p>
+        <div class="field-grid two">
+          <label class="field"><span>Seed</span><input id="seed" type="text" value="PA-LIGHT-001" maxlength="96"></label>
+          <label class="field"><span>Mutation</span><input id="mutation" type="number" value="0" min="0" max="2147483647" step="1"></label>
+        </div>
+        <label class="field">
+          <span>Export profile</span>
+          <select id="profile">
+            <option value="archive">Archive · 44.1 kHz / −0.70 dBFS</option>
+            <option value="suno-seed">Suno Seed · 48 kHz / −6.00 dBFS</option>
+            <option value="laboratory-hot">Laboratory Hot · 44.1 kHz / −0.10 dBFS</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><span>02</span><h2>Light source</h2></div>
+        <label class="field">
+          <span>Instrument preset</span>
+          <select id="preset">
+            <option value="industrial-fib">Industrial Fibonacci</option>
+            <option value="soot-music">Soot Music</option>
+            <option value="resonant-gas">Resonant Gas Cell</option>
+            <option value="ultrasonic-edge">Ultrasonic Edge</option>
+            <option value="drone-dark">Dark Thermal Drone</option>
+            <option value="evolving-demo">Evolving Material Demo</option>
+            <option value="pulse-lab">Pulse Laboratory</option>
+            <option value="tone-lab">Tone Laboratory</option>
+            <option value="wav-through">WAV Through Light</option>
+          </select>
+        </label>
+        <p class="preset-description" id="preset-description"></p>
+
+        <div id="wav-source-wrap" class="drop-zone hidden">
+          <input id="source-file" type="file" accept="audio/wav,.wav">
+          <label for="source-file" tabindex="0" role="button"><strong>LOAD LOCAL WAV</strong><span>PCM8/16/24/32 or Float32/64 · float is Replay Safe only · never uploaded</span></label>
+          <output id="source-summary">No source loaded</output>
+        </div>
+
+        <div class="field-grid two">
+          <label class="field"><span>Duration (s)</span><input id="duration" type="number" value="20" min="0.25" max="120" step="0.25"></label>
+          <label class="field"><span>BPM</span><input id="bpm" type="number" value="90" min="20" max="300" step="0.1"></label>
+          <label class="field"><span>Tone (Hz)</span><input id="tone-frequency" type="number" value="220" min="10" max="12000" step="0.01"></label>
+          <label class="field"><span>Pulse rate (Hz)</span><input id="pulse-rate" type="number" value="8" min="0.05" max="500" step="0.01"></label>
+          <label class="field"><span>Second rate (Hz)</span><input id="pulse-rate-2" type="number" value="12.5" min="0.05" max="500" step="0.01"></label>
+          <label class="field"><span>Pulse width (ms)</span><input id="pulse-width" type="number" value="3" min="0.02" max="250" step="0.01"></label>
+          <label class="field"><span>Fibonacci depth</span><input id="fib-depth" type="number" value="9" min="2" max="16" step="1"></label>
+          <label class="field"><span>Pulse shape</span><select id="pulse-shape"><option value="gaussian">Gaussian</option><option value="exponential">Exponential</option><option value="rectangular">Rectangular</option></select></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><span>03</span><h2>Absorber material</h2></div>
+        <label class="field"><span>Material preset</span><select id="material"></select></label>
+        <p class="field-note" id="material-note"></p>
+        <div class="field-grid two">
+          <label class="field"><span>Absorption μ<sub>a</sub></span><input id="absorption" type="number" min="0" max="2" step="0.001"></label>
+          <label class="field"><span>Thermal τ (ms)</span><input id="thermal-tau" type="number" min="0.01" max="100" step="0.01"></label>
+          <label class="field"><span>Grüneisen Γ</span><input id="gruneisen" type="number" min="0" max="3" step="0.001"></label>
+          <label class="field"><span>Expansion β</span><input id="expansion" type="number" min="0" max="3" step="0.001"></label>
+          <label class="field"><span>Nonlinearity</span><input id="nonlinearity" type="number" min="0" max="1" step="0.001"></label>
+          <label class="field"><span>Laser power</span><input id="laser-power" type="number" min="0" max="4" step="0.01" value="1.4"></label>
+        </div>
+        <label class="switch"><input id="derivative" type="checkbox" checked><span>Blend thermal derivative into pressure</span></label>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><span>04</span><h2>Acoustic resonator</h2></div>
+        <label class="field"><span>Resonator preset</span><select id="resonator"></select></label>
+        <p class="field-note" id="resonator-note"></p>
+        <label class="field"><span>Modes (Hz, comma separated)</span><input id="resonances" type="text"></label>
+        <label class="field"><span>Q factors (comma separated)</span><input id="q-factors" type="text"></label>
+        <label class="field"><span>Resonator gain</span><input id="resonator-gain" type="number" min="0" max="4" step="0.01"></label>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><span>05</span><h2>Post-processing</h2></div>
+        <div class="switch-grid">
+          <label class="switch"><input id="fx-distortion" type="checkbox" checked><span>Optical saturation</span></label>
+          <label class="switch"><input id="fx-eq" type="checkbox"><span>Three-band EQ</span></label>
+          <label class="switch"><input id="fx-chorus" type="checkbox"><span>Chorus cell</span></label>
+          <label class="switch"><input id="fx-reverb" type="checkbox" checked><span>Chamber reverb</span></label>
+        </div>
+        <div class="field-grid two">
+          <label class="field"><span>Drive</span><input id="drive" type="number" min="1" max="12" value="2.2" step="0.1"></label>
+          <label class="field"><span>Distortion mix</span><input id="dist-mix" type="number" min="0" max="1" value="0.4" step="0.01"></label>
+          <label class="field"><span>Reverb wet</span><input id="reverb-wet" type="number" min="0" max="0.9" value="0.4" step="0.01"></label>
+          <label class="field"><span>Chorus mix</span><input id="chorus-mix" type="number" min="0" max="0.9" value="0.25" step="0.01"></label>
+        </div>
+      </section>
+    </aside>
+
+    <section class="lab-bench" id="analysis-stage" tabindex="-1">
+      <section class="hero-panel">
+        <div>
+          <p class="eyebrow">AUDIBLE LIGHT / REPRODUCIBLE PRESSURE</p>
+          <h2>MODULATED LIGHT → HEAT → PRESSURE → SOUND</h2>
+          <p>Design an optical intensity signal, pass it through an explicit absorber and cavity model, then export the resulting pressure field as a provenance-bound PCM WAV stem.</p>
+        </div>
+        <div class="equation" aria-label="Simplified photoacoustic equation">
+          <span>I(t)</span><i>μ<sub>a</sub></i><span>T(t)</span><i>Γβ</i><span>p(t)</span><i>H<sub>cavity</sub></i><span>WAV</span>
+        </div>
+      </section>
+
+      <section class="render-console panel">
+        <div class="render-actions">
+          <button id="render" class="primary">RENDER PHOTOACOUSTIC STEM</button>
+          <button id="cancel" class="danger" disabled>CANCEL</button>
+          <button id="reset">RESET PRESET</button>
+          <label class="manifest-load" tabindex="0" role="button">REPLAY MANIFEST<input id="manifest-file" class="visually-hidden" type="file" accept="application/json,.json"></label>
+        </div>
+        <div class="progress-track" id="progress-track" role="progressbar" aria-label="Render progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress"></span></div>
+        <div class="console-line"><span id="render-status" aria-live="polite">READY · configure a light source and render</span><time id="render-time"></time></div>
+      </section>
+
+      <section class="metrics" aria-label="Render metrics">
+        <article><span>PEAK</span><strong id="metric-peak">—</strong><small>dBFS</small></article>
+        <article><span>RMS</span><strong id="metric-rms">—</strong><small>dBFS</small></article>
+        <article><span>DURATION</span><strong id="metric-duration">—</strong><small>seconds</small></article>
+        <article><span>WAV SHA-256</span><strong id="metric-hash">—</strong><small id="metric-mode">no render</small></article>
+      </section>
+
+      <section class="visual-panel panel">
+        <div class="panel-title-row">
+          <div><p class="eyebrow">IDENTITY-BEARING OUTPUT</p><h2>Acoustic waveform</h2></div>
+          <div class="transport">
+            <button id="play" disabled>PLAY</button>
+            <button id="stop" disabled>STOP</button>
+            <span id="transport-time">00:00.000 / 00:00.000</span>
+          </div>
+        </div>
+        <canvas id="waveform" width="1200" height="260" role="img" aria-label="Rendered acoustic waveform">Rendered PCM waveform. Exact metrics are available in the metric cards and fingerprint artifact.</canvas>
+        <audio id="audio" preload="metadata"></audio>
+      </section>
+
+      <section class="visual-grid">
+        <section class="panel visual-panel">
+          <div class="panel-title-row">
+            <div><p class="eyebrow">OBSERVATIONAL VIEW</p><h2>Spectrogram</h2></div>
+            <label class="compact-field">Scale<select id="frequency-scale"><option value="log">Log</option><option value="linear">Linear</option></select></label>
+          </div>
+          <canvas id="spectrogram" width="760" height="380" role="img" aria-label="Rendered spectrogram">Rendered FFT spectrogram. Exact audio metrics are available in the fingerprint artifact.</canvas>
+        </section>
+        <section class="panel visual-panel">
+          <div class="panel-title-row"><div><p class="eyebrow">PIPELINE TELEMETRY</p><h2>Stage traces</h2></div></div>
+          <div class="stage-tabs" role="tablist" aria-label="Model stage trace">
+            <button class="active" id="tab-light" role="tab" aria-selected="true" aria-controls="stage-trace" data-stage="light">LIGHT</button><button id="tab-temperature" role="tab" aria-selected="false" aria-controls="stage-trace" data-stage="temperature">HEAT</button><button id="tab-pressure" role="tab" aria-selected="false" aria-controls="stage-trace" data-stage="pressure">PRESSURE</button><button id="tab-acoustic" role="tab" aria-selected="false" aria-controls="stage-trace" data-stage="acoustic">ACOUSTIC</button>
+          </div>
+          <canvas id="stage-trace" width="760" height="320" role="img" aria-label="Selected model stage trace">Selected stage trace. A textual description follows this graphic.</canvas>
+          <p id="stage-caption" class="field-note">Light intensity modulation entering the absorber.</p>
+        </section>
+      </section>
+
+      <section class="result-grid">
+        <section class="panel">
+          <div class="panel-heading"><span>06</span><h2>Artifacts</h2></div>
+          <div id="downloads" class="downloads empty"><p>Render a stem to create deterministic artifacts.</p></div>
+        </section>
+        <section class="panel">
+          <div class="panel-heading"><span>07</span><h2>Observation contract</h2></div>
+          <dl class="contract-list" id="contract-list">
+            <div><dt>Recipe</dt><dd>—</dd></div><div><dt>PCM payload</dt><dd>—</dd></div><div><dt>Fingerprint</dt><dd>—</dd></div><div><dt>Contract</dt><dd>—</dd></div>
+          </dl>
+        </section>
+      </section>
+
+      <section class="panel history-panel">
+        <div class="panel-title-row"><div><p class="eyebrow">LOCAL ONLY</p><h2>Render history</h2></div><button id="clear-history">CLEAR HISTORY</button></div>
+        <div id="history" class="history empty">No locally persisted renders.</div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <span>SPECTRAL PHOTOACOUSTIC LABORATORY 2.0</span>
+    <span>MIT LICENSE · TRENT SLADE / QSOL-IMC · NO NETWORK CLIENT</span>
+  </footer>
+
+  <script defer src="js/core.js"></script>
+  <script defer src="js/wav.js"></script>
+  <script defer src="js/model.js"></script>
+  <script defer src="js/provenance.js"></script>
+  <script defer src="js/storage.js"></script>
+  <script defer src="js/visuals.js"></script>
+  <script defer src="js/ui.js"></script>
+  <script defer src="app.js"></script>
+</body>
+</html>
