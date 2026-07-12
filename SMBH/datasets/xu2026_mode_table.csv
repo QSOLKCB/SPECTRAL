@@ -1,0 +1,4 @@
+family,optical_path_um,diameter_um,evidence_class,source,audio_default_hz,audio_classification,q_default,q_classification
+photon-sphere,217,44.3,measured,Figure 4c and Section 3.1,400.0,user_selected,65,assumed
+edge-wgm,237,48.4,measured,Figure 4c and Section 3.1,366.2447,derived_from_audio_anchor,420,assumed
+outer-wgm,268,54.7,measured,Figure 4c and Section 3.1,323.8806,derived_from_audio_anchor,420,assumed
