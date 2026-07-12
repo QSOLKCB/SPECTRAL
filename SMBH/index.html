@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>SPECTRAL SMBH Analogue Laboratory</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#lab">Skip to laboratory</a>
+  <noscript><div class="fatal">JavaScript is required. No data leaves this browser.</div></noscript>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div><p class="eyebrow">SPECTRAL / CURVED-CAVITY SONIFICATION</p><h1>SMBH ANALOGUE LABORATORY <b>1.0</b></h1></div>
+    </div>
+    <div class="chips"><span class="chip good">OFFLINE · LOCAL</span><span class="chip">NO BUILD · NO NETWORK</span><a class="chip link" href="tests/index.html">SELF-TESTS</a></div>
+  </header>
+
+  <div class="boundary"><strong>SCIENTIFIC CLAIM BOUNDARY</strong><span>This app sonifies an optical analogue and a separate Kerr fit. It does not simulate a merger, gravitational-wave detector, laser gain dynamics, or the full electromagnetic experiment.</span></div>
+
+  <main class="layout" id="lab">
+    <aside class="rack" aria-label="Model controls">
+      <section class="panel">
+        <div class="heading"><span>01</span><h2>Experiment</h2></div>
+        <label class="field"><span>Engine</span><select id="engine"><option value="xu">Xu optical analogue</option><option value="kerr">Kerr 220 extension</option></select></label>
+        <label class="field"><span>Scene</span><select id="scene"></select></label>
+        <p class="note" id="scene-note"></p>
+        <label class="field"><span>Determinism mode</span><select id="mode"><option value="canonical-strict">Canonical Strict</option><option value="replay-safe">Replay Safe</option></select></label>
+        <p class="note" id="mode-note"></p>
+        <div class="grid two"><label class="field"><span>Seed</span><input id="seed" value="SMBH-XU-001" maxlength="80"></label><label class="field"><span>Mutation</span><input id="mutation" type="number" value="0" min="0" max="2147483647" step="1"></label></div>
+      </section>
+
+      <section class="panel xu-only">
+        <div class="heading"><span>02</span><h2>Measured geometry</h2></div>
+        <div class="source-table" role="table" aria-label="Measured optical paths">
+          <div role="row"><b>Family</b><b>nL</b><b>Audio</b></div>
+          <div role="row"><span>Photon sphere</span><span>217 μm</span><strong id="psm-hz-read">400.0 Hz</strong></div>
+          <div role="row"><span>Edge WGM</span><span>237 μm</span><strong id="edge-hz-read">366.2 Hz</strong></div>
+          <div role="row"><span>Outer WGM</span><span>268 μm</span><strong id="outer-hz-read">323.9 Hz</strong></div>
+        </div>
+        <label class="field"><span>PSM audio anchor (Hz) <em>mapping choice</em></span><input id="anchor" type="number" value="400" min="40" max="2000" step="0.1"></label>
+        <label class="field"><span>Comb partials <em>mapping choice</em></span><input id="partials" type="number" value="6" min="1" max="12" step="1"></label>
+        <div class="grid two"><label class="field"><span>PSM Q <em>assumed</em></span><input id="q-psm" type="number" value="65" min="1" max="2000" step="1"></label><label class="field"><span>WGM Q <em>assumed</em></span><input id="q-wgm" type="number" value="420" min="1" max="5000" step="1"></label></div>
+        <label class="field"><span>Pump position</span><input id="pump" type="range" min="0" max="1000" value="500"><output id="pump-read">waist · z = 0.000</output></label>
+      </section>
+
+      <section class="panel kerr-only hidden">
+        <div class="heading"><span>02</span><h2>Kerr extension</h2></div>
+        <p class="note warning">The Kerr engine is a theoretical sonification extension. It is not part of Xu et al.'s Schwarzschild microcavity experiment.</p>
+        <label class="field"><span>Dimensionless spin χ</span><input id="spin" type="range" min="0" max="990" value="700"><output id="spin-read">0.700</output></label>
+        <label class="field"><span>Schwarzschild 220 anchor (Hz)</span><input id="kerr-anchor" type="number" value="220" min="40" max="1000" step="0.1"></label>
+        <label class="field"><span>Overtone mix</span><input id="overtone" type="range" min="0" max="1000" value="220"><output id="overtone-read">0.220</output></label>
+      </section>
+
+      <section class="panel">
+        <div class="heading"><span>03</span><h2>Render</h2></div>
+        <div class="grid two"><label class="field"><span>Duration (s)</span><input id="duration" type="number" value="12" min="0.5" max="60" step="0.25"></label><label class="field"><span>Sample rate</span><select id="sample-rate"><option value="44100">44.1 kHz</option><option value="48000">48 kHz</option></select></label></div>
+        <div class="grid two"><label class="field"><span>Output peak</span><select id="peak"><option value="-0.7">−0.7 dBFS</option><option value="-3">−3 dBFS</option><option value="-6">−6 dBFS</option></select></label><label class="field"><span>Stereo width</span><input id="width" type="range" min="0" max="1000" value="350"><output id="width-read">0.350</output></label></div>
+        <label class="switch"><input id="reverb" type="checkbox"><span>Pedagogical cavity echo <em>non-physical FX</em></span></label>
+      </section>
+    </aside>
+
+    <section class="bench">
+      <section class="hero panel">
+        <div><p class="eyebrow">AUDIBLE CURVATURE / EXPLICIT ASSUMPTIONS</p><h2>OPTICAL PATH → FREQUENCY RATIO → DAMPED MODE FAMILY</h2><p>Explore photon-sphere and whispering-gallery families, move the virtual pump stripe, compare damping, and export provenance-bound WAV stems.</p></div>
+        <canvas id="cavity" width="720" height="300" role="img" aria-label="Curved cavity and pump position"></canvas>
+      </section>
+
+      <section class="console panel">
+        <div class="actions"><button id="render" class="primary">RENDER SONIFICATION</button><button id="cancel" disabled>CANCEL</button><button id="reset">RESET</button><label class="load">REPLAY MANIFEST<input id="manifest-file" type="file" accept="application/json,.json"></label></div>
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress"></span></div>
+        <div class="status"><span id="status" aria-live="polite">READY · choose a scene and render</span><time id="elapsed"></time></div>
+      </section>
+
+      <section class="metrics"><article><span>PEAK</span><strong id="m-peak">—</strong><small>dBFS</small></article><article><span>RMS</span><strong id="m-rms">—</strong><small>dBFS</small></article><article><span>PSM / 220</span><strong id="m-freq">—</strong><small>Hz</small></article><article><span>WAV SHA-256</span><strong id="m-hash">—</strong><small id="m-mode">no render</small></article></section>
+
+      <section class="panel visual">
+        <div class="title-row"><div><p class="eyebrow">IDENTITY-BEARING OUTPUT</p><h2>Waveform</h2></div><div class="transport"><button id="play" disabled>PLAY</button><button id="stop" disabled>STOP</button><span id="clock">00:00.000 / 00:00.000</span></div></div>
+        <canvas id="waveform" width="1200" height="270" role="img" aria-label="Rendered waveform"></canvas><audio id="audio" preload="metadata"></audio>
+      </section>
+
+      <section class="visual-grid">
+        <section class="panel visual"><div class="title-row"><div><p class="eyebrow">OBSERVATIONAL VIEW</p><h2>Spectrogram</h2></div><label class="mini">Scale<select id="freq-scale"><option value="log">Log</option><option value="linear">Linear</option></select></label></div><canvas id="spectrogram" width="760" height="400" role="img" aria-label="Rendered spectrogram"></canvas></section>
+        <section class="panel"><div class="title-row"><div><p class="eyebrow">EVIDENCE LEDGER</p><h2>What the controls mean</h2></div></div><div id="ledger" class="ledger"></div></section>
+      </section>
+
+      <section class="result-grid"><section class="panel"><div class="heading"><span>04</span><h2>Artifacts</h2></div><div id="downloads" class="downloads empty">Render to create a WAV, manifest, recipe, fingerprint, and CSV mode table.</div></section><section class="panel"><div class="heading"><span>05</span><h2>Render contract</h2></div><dl id="contract" class="contract"><div><dt>Recipe</dt><dd>—</dd></div><div><dt>PCM</dt><dd>—</dd></div><div><dt>WAV</dt><dd>—</dd></div><div><dt>Contract</dt><dd>—</dd></div></dl></section></section>
+    </section>
+  </main>
+
+  <footer><span>SPECTRAL SMBH ANALOGUE LABORATORY 1.0</span><span>MIT LICENSE · TRENT SLADE / QSOL-IMC · XU ET AL. DOI 10.1002/advs.202517466</span></footer>
+  <script defer src="app.js"></script>
+</body>
+</html>
