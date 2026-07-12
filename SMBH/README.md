@@ -1,4 +1,5 @@
-# SPECTRAL Optical Black-Hole Analogue Sonifier 1.0
+## SPECTRAL Photon-Sphere Sonification Laboratory 1.0
+A deterministic auditory model of photon-sphere and whispering-gallery modes in a curved optical black-hole analogue.
 
 **A zero-install, browser-native laboratory for sonifying photon-sphere and whispering-gallery mode families from Xu et al.'s curved optical microcavity, with an explicitly separate Kerr 220 extension.**
 
