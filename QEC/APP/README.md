@@ -27,7 +27,7 @@ This is an epistemic software workflow inspired by observation-dark modes. It is
 1. Download this directory.
 2. Open index.html.
 3. Select a state, code, channel, decoder, and sonic texture.
-4. Optionally load a local QEC CSV, TSV, or JSON event dataset.
+4. Optionally load a local QEC CSV, TSV, or JSON event dataset. Or you can use this file: qec_data_prepared.csv
 5. Select **Render WAV + Observe**.
 6. Audition the render or export the bound artifacts.
 
