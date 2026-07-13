@@ -9,7 +9,7 @@
 
 SPECTRAL is an experimental research and development repository by **Trent Slade / QSOL-IMC**. It explores deterministic, replay-aware, and explicitly creative mappings between data, symbolic structures, mathematical symmetry, signal synthesis, time-frequency analysis, three-dimensional visualization, and audible perception.
 
-The repository combines four zero-install browser applications with Python research scripts, reproducible audio artifacts, visualization experiments, and provenance-oriented workflows. The browser applications run directly from their folders without a server, build system, package manager, cloud service, or network connection.
+The repository combines five zero-install browser applications with Python research scripts, reproducible audio artifacts, visualization experiments, and provenance-oriented workflows. The browser applications run directly from their folders without a server, build system, package manager, cloud service, or network connection.
 
 ## Project areas
 
@@ -17,8 +17,9 @@ The repository combines four zero-install browser applications with Python resea
 |---|---|
 | [APP](APP/) | Browser-native **SPECTRAL Deterministic Sonification Workbench 2.0**. Open `APP/index.html` directlyâ€”no server, Node, npm, build system, or network connection required. Supports Canonical Strict and Replay Safe determinism modes, WAV export, fingerprints, manifests, hashes, and derivative-lineage documentation. |
 | [E8/APP](E8/APP/) | Browser-native **SPECTRAL E8 Geometry Studio 1.0**. A fast musical instrument for exploring all 240 E8 roots across an evolving eight-dimensional Cartan torus, with Canonical Deterministic, Replay-Safe, and explicitly Non-Deterministic Creative modes, long-form WAV rendering, scene morphing, spatial variants, and provenance bundles. |
-| [E8](E8/) | E8-inspired signal generators, astronomical-data sonification, triality/Ï† mappings, QEC-oriented event mapping, WAV material, experimental visualization code, and the E8 Geometry Studio above. |
+| [E8](E8/) | E8-inspired signal generators, astronomical-data sonification, triality/φ mappings, QEC-oriented event mapping, WAV material, experimental visualization code, and the E8 Geometry Studio above. |
 | [SMBH](SMBH/) | Browser-native **SPECTRAL Photon-Sphere Sonification Laboratory 1.0**. Sonifies photon-sphere and whispering-gallery mode relationships from a curved optical black-hole analogue, with a clearly separate Kerr 220 extension, Canonical Strict and Replay Safe modes, WAV/provenance export, and explicit scientific claim boundaries. |
+| [QEC/APP](QEC/APP/) | Browser-native **SPECTRAL QEC Sonification Laboratory 1.0**. Uses a Render → Commit → Reveal protocol to sonify Bell, GHZ, W, qutrit, repetition, perfect, Steane, surface-code, and sparse QLDPC models or local QEC event datasets, with deterministic WAV, manifest, event-stream, observation-receipt, and bundle exports. |
 | [OMI-ISA](OMI-ISA/) | OMI/XOR/E8 sonification experiments, including XOR-ring and fractal-cosmovirus mappings. |
 | [PHOTOACOUSTIC](PHOTOACOUSTIC/) | Browser-native **SPECTRAL Photoacoustic Laboratory 2.0**. A deterministic light-to-sound model and music generator that maps synthetic or local WAV-derived light intensity through explicit optical, thermal, pressure, and resonator stages. |
 | [SONIFICATION](SONIFICATION/) | Scripts, datasets, audio, figures, and supporting material associated with the receipt-bound deterministic information-lattice sonification research cited below. |
@@ -38,6 +39,7 @@ Open any application directly in a modern browser:
 APP/index.html                 Deterministic Sonification Workbench 2.0
 E8/APP/index.html              E8 Geometry Studio 1.0
 SMBH/index.html                Photon-Sphere Sonification Laboratory 1.0
+QEC/APP/index.html             QEC Sonification Laboratory 1.0
 PHOTOACOUSTIC/index.html       Photoacoustic Laboratory 2.0
 ```
 
@@ -47,10 +49,11 @@ Each application has a browser-native known-answer or contract suite:
 APP/tests/index.html
 E8/APP/tests/index.html
 SMBH/tests/index.html
+QEC/APP/tests/index.html
 PHOTOACOUSTIC/tests/index.html
 ```
 
-See the [Workbench README](APP/README.md), [E8 Geometry Studio README](E8/APP/README.md), [Photon-Sphere Laboratory README](SMBH/README.md), and [Photoacoustic Laboratory README](PHOTOACOUSTIC/README.md) for their mappings, determinism contracts, export artifacts, replay rules, privacy boundaries, and acceptance tests.
+See the [Workbench README](APP/README.md), [E8 Geometry Studio README](E8/APP/README.md), [Photon-Sphere Laboratory README](SMBH/README.md), [QEC Sonification Laboratory README](QEC/APP/README.md), and [Photoacoustic Laboratory README](PHOTOACOUSTIC/README.md) for their mappings, determinism contracts, export artifacts, replay rules, privacy boundaries, and acceptance tests.
 
 ### Python experiments
 
@@ -83,6 +86,8 @@ Terms such as *E8-inspired*, *Coxeter-inspired*, *triality*, *qutrit*, *Bell-sta
 Unless a specific experiment supplies and validates a separate physical method, these terms do **not** claim that generated audio performs physical quantum computation, exactly represents the complete E8 Lie group, proves a biomedical or cosmological hypothesis, or provides empirical evidence for a physical theory.
 
 The SMBH application sonifies a curved optical black-hole analogue and a separately labelled Kerr fit. It does **not** simulate a merger, a gravitational-wave detector, laser gain dynamics, or the complete electromagnetic experiment. The E8 Geometry Studio uses E8 as a control and composition geometry; its audio is not presented as a physical E8 measurement.
+
+The QEC Sonification Laboratory sonifies deterministic classical QEC models or supplied event datasets. Its render-bound observation protocol does **not** perform physical quantum measurement, state tomography, quantum-hardware access, or fault-tolerance validation.
 
 ## Publications and datasets
 
