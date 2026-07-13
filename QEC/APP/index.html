@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; connect-src 'none'; img-src 'self' data: blob:; media-src 'self' data: blob:; object-src 'none'; frame-src 'none'; font-src 'self'; script-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>SPECTRAL QEC Sonification Laboratory 1.0</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <noscript><div class="fatal">This laboratory requires JavaScript. It never sends data anywhere.</div></noscript>
+
+  <div id="qec-lab">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><b>Q</b><span>EC</span></div>
+        <div class="brand-copy">
+          <div class="brand-line">SPECTRAL <i>/</i> QEC</div>
+          <h1>Quantum Error Correction Sonification Laboratory</h1>
+          <p>Hear errors, syndromes, corrections, residuals, and state signatures</p>
+        </div>
+      </div>
+      <div class="header-status" aria-label="Laboratory status">
+        <span class="chip local"><i></i>LOCAL ONLY</span>
+        <span class="chip">ENGINE · 1.0.0</span>
+        <span class="chip dark" id="header-observation">OBSERVATION · DARK</span>
+      </div>
+    </header>
+
+    <main class="lab-shell">
+      <aside class="controls" aria-label="Experiment controls">
+        <section class="panel control-panel">
+          <div class="panel-title"><div><span>01 · RENDER CONTRACT</span><h2>Observation Protocol</h2></div><b>v1</b></div>
+          <div class="mode-grid">
+            <label class="mode-card selected"><input class="identity" type="radio" name="mode" value="canonical_strict" checked><i></i><span><strong>CANONICAL STRICT</strong><small>Integer PCM · archival identity</small></span></label>
+            <label class="mode-card"><input class="identity" type="radio" name="mode" value="replay_safe"><i></i><span><strong>REPLAY SAFE</strong><small>Runtime-bound recipe identity</small></span></label>
+          </div>
+          <div class="protocol-note"><span class="mini-lock"></span><p><strong>Render → Commit → Reveal.</strong> Error events, syndromes, corrections, residuals, waveform, spectrum, and hashes stay dark until the WAV and observation receipt exist.</p></div>
+        </section>
+
+        <section class="panel control-panel">
+          <div class="panel-title compact"><div><span>02 · LAB SCENE</span><h2>Experiment Presets</h2></div><button id="reset" class="text-button" type="button">RESET</button></div>
+          <div class="preset-grid" id="preset-grid">
+            <button type="button" data-preset="bell"><strong>BELL PARITY</strong><small>Φ+ · X channel</small></button>
+            <button type="button" data-preset="ghz"><strong>GHZ FRACTURE</strong><small>GHZ₃ · burst</small></button>
+            <button type="button" data-preset="steane"><strong>STEANE GLASS</strong><small>[[7,1,3]] · depolarizing</small></button>
+            <button type="button" data-preset="surface"><strong>SURFACE GRID</strong><small>d=3 · biased X/Z</small></button>
+            <button type="button" data-preset="qldpc"><strong>QLDPC PULSE</strong><small>Tanner projection</small></button>
+            <button type="button" data-preset="qutrit"><strong>QUTRIT SHIFT</strong><small>mod-3 recovery</small></button>
+          </div>
+        </section>
+
+        <section class="panel control-panel">
+          <div class="panel-title compact"><div><span>03 · QUANTUM MODEL</span><h2>State + Code</h2></div><b>MODEL v1</b></div>
+          <label for="state">Source-state signature</label>
+          <select class="identity" id="state"></select>
+          <p class="field-note" id="state-note"></p>
+          <label for="code">QEC code / observer</label>
+          <select class="identity" id="code"></select>
+          <div class="code-spec" id="code-spec"><div><span>n</span><b>—</b></div><div><span>k</span><b>—</b></div><div><span>d</span><b>—</b></div><div><span>checks</span><b>—</b></div></div>
+          <p class="field-note" id="code-note"></p>
+        </section>
+
+        <section class="panel control-panel">
+          <div class="panel-title compact"><div><span>04 · ERROR CHANNEL</span><h2>Noise + Recovery</h2></div></div>
+          <label for="noise">Error model</label>
+          <select class="identity" id="noise"></select>
+          <p class="field-note" id="noise-note"></p>
+          <label for="decoder">Decoder projection</label>
+          <select class="identity" id="decoder"></select>
+          <p class="field-note" id="decoder-note"></p>
+          <div class="two-cols">
+            <label><span>Error rate</span><div class="unit"><input class="identity" id="error-rate" type="number" value="12" min="0" max="75" step="0.1"><i>%</i></div></label>
+            <label><span>QEC cycles</span><input class="identity" id="cycles" type="number" value="16" min="1" max="64" step="1"></label>
+            <label><span>Max iterations</span><input class="identity" id="iterations" type="number" value="8" min="1" max="32" step="1"></label>
+            <label><span>Mutation</span><input class="identity" id="mutation" type="number" value="0" min="0" max="4294967295" step="1"></label>
+          </div>
+        </section>
+
+        <section class="panel control-panel">
+          <div class="panel-title compact"><div><span>05 · MUSICAL MAPPING</span><h2>Instrument Layer</h2></div></div>
+          <label for="texture">Sonic texture</label>
+          <select class="identity" id="texture">
+            <option value="harmonic_glass">Harmonic Glass</option>
+            <option value="mos_lattice">MOS 6581 Lattice</option>
+            <option value="industrial_pauli">Industrial Pauli Frame</option>
+            <option value="dark_subspace">Dark Subspace</option>
+          </select>
+          <div class="two-cols">
+            <label><span>Tuning A</span><div class="unit"><input class="identity" id="tuning" type="number" value="432" min="400" max="480" step="1"><i>Hz</i></div></label>
+            <label><span>Tempo</span><div class="unit"><input class="identity" id="tempo" type="number" value="140" min="40" max="240" step="1"><i>BPM</i></div></label>
+            <label><span>Duration</span><select class="identity" id="duration"><option value="4">4 s</option><option value="8" selected>8 s</option><option value="16">16 s</option><option value="30">30 s</option></select></label>
+            <label><span>Stereo width</span><div class="unit"><input class="identity" id="width" type="number" value="72" min="0" max="100" step="1"><i>%</i></div></label>
+          </div>
+          <label class="range-label" for="intensity"><span>Mapping intensity <output id="intensity-out">70%</output></span><input class="identity" id="intensity" type="range" min="10" max="100" value="70"></label>
+          <label class="toggle-row"><input class="identity" id="drone" type="checkbox" checked><i></i><span><strong>STATE DRONE</strong><small>Keep the selected state audible beneath QEC events</small></span></label>
+        </section>
+
+        <section class="panel control-panel">
+          <div class="panel-title compact"><div><span>06 · LOCAL DATASET</span><h2>QEC Event Source</h2></div><b>OFFLINE</b></div>
+          <div class="drop-zone" id="drop-zone">
+            <span>⇩</span><strong>DROP QEC DATASET</strong><small>CSV · TSV · JSON · local bytes only</small>
+            <button class="secondary" id="choose-file" type="button">CHOOSE FILE</button>
+            <input id="file-input" type="file" accept=".csv,.tsv,.json,.txt" hidden>
+          </div>
+          <div class="source-status" id="source-status"><span>GENERATED EXPERIMENT</span><small>No external source loaded</small></div>
+          <button class="text-button danger" id="clear-source" type="button" hidden>CLEAR DATASET</button>
+        </section>
+
+        <section class="panel control-panel render-panel">
+          <button class="render-button" id="render" type="button"><span>▶</span><div><strong>RENDER WAV + OBSERVE</strong><small>Bind audio, events, hashes, and receipt</small></div></button>
+          <div class="progress" id="progress"><div><span></span></div><p>READY · OBSERVATION REMAINS DARK</p></div>
+        </section>
+      </aside>
+
+      <section class="stage">
+        <div class="notice"><span>i</span><p><strong>Local deterministic model.</strong> This laboratory sonifies a classical QEC simulation or supplied event dataset. “Observation” names the app’s software reveal protocol—not physical quantum measurement.</p></div>
+
+        <section class="panel chamber" id="chamber">
+          <div class="chamber-head"><div><span>RENDER-BOUND OBSERVATION CHAMBER</span><h2>Latent QEC State</h2></div><div class="observation-badge dark" id="observation-badge"><i></i><span>UNOBSERVED</span></div></div>
+          <div class="chamber-grid">
+            <article class="latent-card">
+              <span class="card-index">INPUT CONTRACT · VISIBLE</span>
+              <dl>
+                <div><dt>STATE</dt><dd id="latent-state">Bell Φ+</dd></div>
+                <div><dt>CODE</dt><dd id="latent-code">Bell parity observer</dd></div>
+                <div><dt>CHANNEL</dt><dd id="latent-noise">Bit-flip X</dd></div>
+                <div><dt>SEED</dt><dd id="latent-seed">qec-lab:0</dd></div>
+              </dl>
+              <p>Inputs are visible because you chose them. Generated event outcomes and render identity remain sealed.</p>
+            </article>
+            <article class="lock-card" id="lock-card">
+              <div class="orbit" aria-hidden="true"><span></span><i></i><b></b></div>
+              <strong>OBSERVATION-DARK</strong>
+              <p>Error locations, syndrome bits, decoder actions, residuals, waveform, spectrum, PCM hash, and receipt are withheld.</p>
+              <code>NO WAV · NO RECEIPT · NO REVEAL</code>
+            </article>
+          </div>
+          <div class="summary-grid hidden" id="summary-grid">
+            <article><span>ERROR EVENTS</span><strong id="sum-errors">—</strong><small>Injected channel events</small></article>
+            <article><span>SYNDROME WEIGHT</span><strong id="sum-syndrome">—</strong><small>Across all cycles</small></article>
+            <article><span>CORRECTIONS</span><strong id="sum-corrections">—</strong><small>Decoder actions</small></article>
+            <article><span>RESIDUALS</span><strong id="sum-residuals">—</strong><small>Post-recovery errors</small></article>
+          </div>
+        </section>
+
+        <div class="visual-grid">
+          <section class="panel visual"><div class="visual-head"><div><span>STATE SPACE</span><h2>Amplitude Constellation</h2></div><b id="state-tag">DARK</b></div><canvas id="state-canvas" width="900" height="460"></canvas></section>
+          <section class="panel visual"><div class="visual-head"><div><span>CHECK SPACE</span><h2>Syndrome Lattice</h2></div><b id="syndrome-tag">DARK</b></div><canvas id="syndrome-canvas" width="900" height="460"></canvas></section>
+        </div>
+
+        <section class="panel audio-panel">
+          <div class="visual-head"><div><span>AUDIO OBSERVABLE</span><h2>Waveform + Spectrum</h2></div><b id="audio-tag">SEALED</b></div>
+          <label>BOUND PCM WAVEFORM</label><canvas id="waveform" width="1500" height="260"></canvas>
+          <label>DETERMINISTIC TIME–FREQUENCY VIEW</label><canvas id="spectrum" width="1500" height="340"></canvas>
+        </section>
+
+        <section class="panel transport">
+          <div><span>LOCAL PLAYBACK</span><h2>Audition Render</h2><p id="render-name">No observed render</p></div>
+          <audio id="audio" controls preload="metadata"></audio>
+          <button class="secondary" id="download-wav" type="button" disabled>DOWNLOAD WAV</button>
+        </section>
+
+        <div class="output-grid">
+          <section class="panel output-card"><div class="visual-head"><div><span>DECODER REPORT</span><h2>Recovery Result</h2></div><b class="result neutral" id="recovery-badge">PENDING</b></div><dl class="result-list"><div><dt>Logical status</dt><dd id="logical-status">WITHHELD</dd></div><div><dt>Correction ratio</dt><dd id="correction-ratio">—</dd></div><div><dt>Cycles clean</dt><dd id="clean-cycles">—</dd></div><div><dt>Model scope</dt><dd>CLASSICAL PROJECTION</dd></div></dl></section>
+          <section class="panel output-card"><div class="visual-head"><div><span>PROVENANCE</span><h2>Bound Identities</h2></div><b>SHA-256</b></div><dl class="hash-list"><div><dt>WAV</dt><dd id="wav-hash">WITHHELD</dd></div><div><dt>EVENT STREAM</dt><dd id="event-hash">WITHHELD</dd></div><div><dt>RECIPE</dt><dd id="recipe-hash">WITHHELD</dd></div><div><dt>OBSERVATION</dt><dd id="receipt-hash">WITHHELD</dd></div></dl></section>
+          <section class="panel output-card"><div class="visual-head"><div><span>ARTIFACTS</span><h2>Music + Research Export</h2></div><b>LOCAL</b></div><div class="download-grid"><button data-download="manifest" disabled><span>JSON</span><strong>PROVENANCE MANIFEST</strong></button><button data-download="recipe" disabled><span>JSON</span><strong>RENDER RECIPE</strong></button><button data-download="events" disabled><span>CSV</span><strong>QEC EVENT STREAM</strong></button><button data-download="receipt" disabled><span>JSON</span><strong>OBSERVATION RECEIPT</strong></button><button class="bundle" data-download="bundle" disabled><span>ZIP</span><strong>DETERMINISTIC LAB BUNDLE</strong></button></div></section>
+        </div>
+
+        <section class="panel inspector">
+          <div class="inspector-head"><div><span>POST-RENDER INSPECTOR</span><h2>Observed QEC Events</h2></div><div class="tabs" role="tablist"><button class="active" data-tab="events">EVENTS</button><button data-tab="manifest">MANIFEST</button><button data-tab="receipt">RECEIPT</button><button data-tab="mapping">MAPPING</button></div></div>
+          <div class="table-wrap" id="event-view"><table><thead><tr><th>CYCLE</th><th>QUBIT</th><th>ERROR</th><th>SYNDROME</th><th>CORRECTION</th><th>RESIDUAL</th></tr></thead><tbody id="event-body"><tr><td colspan="6">OBSERVATION-DARK · RENDER WAV TO REVEAL</td></tr></tbody></table></div>
+          <pre id="json-view" hidden>OBSERVATION-DARK</pre>
+        </section>
+
+        <section class="boundary"><div><span>SCIENTIFIC CLAIM BOUNDARY</span><strong>Audible model, not a quantum measurement apparatus.</strong></div><p>The state signatures, stabilizer checks, channel errors, and decoder actions are deterministic classical representations. The reveal rule enforces an epistemic software workflow; it does not claim wavefunction collapse, tomography, quantum-hardware access, or experimental validation.</p></section>
+      </section>
+    </main>
+
+    <footer><span>SPECTRAL QEC SONIFICATION LABORATORY · ZERO INSTALL · OFFLINE FIRST</span><nav><a href="README.md">README</a><a href="docs/SCIENTIFIC_BOUNDARIES.md">SCIENTIFIC BOUNDARIES</a><a href="tests/index.html">SELF-TESTS</a></nav></footer>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
