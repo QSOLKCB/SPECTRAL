@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data: blob:; media-src 'self' data: blob:; object-src 'none'; base-uri 'none'">
+  <title>SPECTRAL E8 Geometry Studio · Self-tests</title>
+  <link rel="stylesheet" href="test-style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div><span class="mark">E8</span><div><h1>Geometry Studio self-tests</h1><p>Browser-native known answers and render-contract checks.</p></div></div>
+      <a href="../index.html">Return to studio</a>
+    </header>
+    <section class="summary">
+      <div><span>Status</span><strong id="status">WAITING</strong></div>
+      <div><span>Passed</span><strong id="passed">0</strong></div>
+      <div><span>Failed</span><strong id="failed">0</strong></div>
+      <button id="run-tests" type="button">Run tests again</button>
+    </section>
+    <div class="progress"><div id="progress"></div></div>
+    <ol id="results" aria-live="polite"></ol>
+    <p class="boundary">These tests verify this implementation and its versioned ABIs. They do not turn creative E8 mappings into physical claims.</p>
+  </main>
+  <script src="../js/core.js" defer></script>
+  <script src="../js/audio.js" defer></script>
+  <script src="../js/engine.js" defer></script>
+  <script src="../js/provenance.js" defer></script>
+  <script src="test-runner.js" defer></script>
+</body>
+</html>
