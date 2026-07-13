@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; media-src 'self' blob: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>SPECTRAL E8 Geometry Studio 1.0</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <noscript><div class="mode-notice"><strong>JavaScript required</strong><span>The renderer is entirely local, but it needs browser JavaScript to synthesize audio.</span></div></noscript>
+  <header class="topbar">
+    <div class="brand-block">
+      <div class="brand-mark" aria-hidden="true">E8</div>
+      <div>
+        <h1>SPECTRAL E8 Geometry Studio <span>1.0</span></h1>
+        <p>Explore musical geometry across 240 roots and eight Cartan dimensions.</p>
+      </div>
+    </div>
+    <fieldset class="mode-switch" aria-label="Render identity mode">
+      <legend>Render domain</legend>
+      <label class="mode-option strict"><input id="mode-strict" type="radio" name="render-mode" value="canonical_strict" checked><span>Canonical</span></label>
+      <label class="mode-option replay"><input id="mode-replay" type="radio" name="render-mode" value="replay_safe"><span>Replay-Safe</span></label>
+      <label class="mode-option creative"><input id="mode-creative" type="radio" name="render-mode" value="creative_nondeterministic"><span>Creative</span></label>
+    </fieldset>
+    <div class="header-state">
+      <span id="mode-lamp" class="state-lamp strict">CANONICAL</span>
+      <span id="runtime-state">OFFLINE · LOCAL DSP</span>
+    </div>
+  </header>
+
+  <div id="mode-notice" class="mode-notice" role="status">
+    <strong>Canonical Deterministic</strong><span>Cross-runtime byte identity inside the versioned Q15 E8 renderer.</span>
+  </div>
+
+  <main class="studio-shell">
+    <aside class="rack setup-rack" aria-label="Session and render controls">
+      <section class="rack-section preset-section">
+        <div class="section-heading"><span>01</span><h2>Starting geometry</h2></div>
+        <label class="field-label" for="preset-select">Factory preset</label>
+        <select id="preset-select"></select>
+        <p id="preset-description" class="field-note"></p>
+        <div class="button-row three">
+          <button id="apply-preset" type="button">Apply</button>
+          <button id="mutate-settings" type="button">Mutate</button>
+          <button id="save-preset" type="button">Save</button>
+        </div>
+        <div class="button-row">
+          <button id="load-recipe" type="button">Load recipe</button>
+          <button id="replay-manifest" type="button">Replay manifest</button>
+        </div>
+        <input id="recipe-file" type="file" accept="application/json,.json" hidden>
+        <input id="manifest-file" type="file" accept="application/json,.json" hidden>
+      </section>
+
+      <section class="rack-section">
+        <div class="section-heading"><span>02</span><h2>Session</h2></div>
+        <div class="field-grid two">
+          <label><span>Duration</span><span class="input-with-unit"><input id="duration-seconds" type="number" min="0.25" max="120" step="0.25" value="30"><em>s</em></span></label>
+          <label><span>Export</span><select id="profile-select"></select></label>
+          <label><span>Seed</span><input id="seed-input" type="text" value="0xE8E83030" spellcheck="false"></label>
+          <label><span>Mutation</span><input id="mutation-input" type="number" min="0" max="2147483647" step="1" value="0"></label>
+        </div>
+        <div class="estimate-panel" aria-live="polite">
+          <div><span>WAV</span><strong id="estimate-wav">—</strong></div>
+          <div><span>Working</span><strong id="estimate-memory">—</strong></div>
+          <div><span>Root evals</span><strong id="estimate-roots">—</strong></div>
+        </div>
+      </section>
+
+      <section class="rack-section render-section">
+        <div class="section-heading"><span>03</span><h2>Render</h2></div>
+        <button id="render-full" class="primary-action" type="button"><span>Render full take</span><kbd>R</kbd></button>
+        <div class="button-row">
+          <button id="render-preview" type="button">8 s preview</button>
+          <button id="new-take" type="button" disabled>New creative take</button>
+        </div>
+        <button id="cancel-render" class="danger-action" type="button" disabled>Cancel render</button>
+        <div class="progress-shell" aria-label="Render progress">
+          <div id="render-progress" class="progress-fill"></div>
+        </div>
+        <div id="render-status" class="render-status" role="status">Ready. No audio has been rendered.</div>
+      </section>
+
+      <section class="rack-section scenes-section">
+        <div class="section-heading"><span>04</span><h2>Scene morph</h2></div>
+        <div class="button-row">
+          <button id="capture-scene-a" type="button">Capture A</button>
+          <button id="capture-scene-b" type="button">Capture B</button>
+        </div>
+        <label class="range-field scene-morph">
+          <span><b>A</b><output id="scene-morph-output">50%</output><b>B</b></span>
+          <input id="scene-morph" type="range" min="0" max="1000" step="1" value="500" disabled>
+        </label>
+        <p class="field-note">Numeric controls interpolate. Discrete geometry switches at the midpoint.</p>
+      </section>
+    </aside>
+
+    <section class="work-deck" aria-label="E8 geometry and audio inspection">
+      <div class="deck-toolbar">
+        <div class="view-tabs" role="tablist" aria-label="Visual inspection">
+          <button type="button" class="view-tab active" data-view="geometry" role="tab" aria-selected="true">E8 map</button>
+          <button type="button" class="view-tab" data-view="waveform" role="tab" aria-selected="false">Waveform</button>
+          <button type="button" class="view-tab" data-view="spectrum" role="tab" aria-selected="false">Spectrum</button>
+        </div>
+        <label class="compact-check"><input id="log-frequency" type="checkbox" checked><span>Log frequency</span></label>
+      </div>
+
+      <div class="canvas-stack">
+        <div class="canvas-panel active" data-panel="geometry"><canvas id="geometry-canvas" aria-label="Projected E8 roots and rendered Cartan trajectory"></canvas></div>
+        <div class="canvas-panel" data-panel="waveform"><canvas id="waveform-canvas" aria-label="Stereo waveform"></canvas></div>
+        <div class="canvas-panel" data-panel="spectrum"><canvas id="spectrum-canvas" aria-label="Audio spectrogram"></canvas></div>
+        <div class="canvas-caption">
+          <span id="geometry-caption">112 integer-family roots · 128 half-integer-family roots</span>
+          <span id="render-hash-short">NO RECEIPT</span>
+        </div>
+      </div>
+
+      <section class="transport-panel">
+        <audio id="audio-player" controls preload="metadata"></audio>
+        <div class="comparison-controls">
+          <button id="store-audio-a" type="button" disabled>Keep as A</button>
+          <button id="play-audio-a" type="button" disabled>Play A</button>
+          <button id="store-audio-b" type="button" disabled>Keep as B</button>
+          <button id="play-audio-b" type="button" disabled>Play B</button>
+        </div>
+      </section>
+
+      <section class="result-deck">
+        <div class="metric-grid">
+          <div><span>Peak</span><strong id="metric-peak">—</strong></div>
+          <div><span>RMS</span><strong id="metric-rms">—</strong></div>
+          <div><span>Stereo ρ</span><strong id="metric-correlation">—</strong></div>
+          <div><span>PCM clips</span><strong id="metric-clips">—</strong></div>
+          <div><span>Trajectory</span><strong id="metric-trajectory">—</strong></div>
+          <div><span>Contract</span><strong id="metric-contract">—</strong></div>
+        </div>
+        <div class="artifact-panel">
+          <div class="section-heading"><span>OUT</span><h2>Take artifacts</h2></div>
+          <div id="artifact-buttons" class="artifact-buttons">
+            <button type="button" data-artifact="audio.wav" disabled>WAV</button>
+            <button type="button" data-artifact="e8_recipe.json" disabled>Recipe</button>
+            <button type="button" data-artifact="manifest.json" disabled>Manifest</button>
+            <button type="button" data-artifact="root_trajectory.csv" disabled>Trajectory CSV</button>
+            <button type="button" data-artifact="observation_contract.json" disabled>Contract</button>
+            <button type="button" data-artifact="bundle.zip" disabled>Full bundle ZIP</button>
+          </div>
+          <p id="artifact-note">Artifacts appear after a successful render.</p>
+        </div>
+      </section>
+    </section>
+
+    <aside class="rack geometry-rack" aria-label="Geometry and synthesis controls">
+      <section class="rack-section">
+        <div class="section-heading"><span>GEO</span><h2>Pitch field</h2></div>
+        <div class="field-grid two">
+          <label><span>Path</span><select data-param="path"><option value="cartan_sweep">Cartan sweep</option><option value="coxeter_orbit">Coxeter orbit</option><option value="triality_spiral">Triality spiral</option><option value="qutrit_orbit">Qutrit 4D orbit</option><option value="root_walk">Root walk</option></select></label>
+          <label><span>Lattice</span><select data-param="lattice"><option value="phi_deep">φ deep ladder</option><option value="phi_centered">φ centred</option><option value="harmonic">Harmonic</option><option value="minor_field">Minor field</option><option value="e8_heights">E8 heights</option></select></label>
+          <label><span>Anchor</span><span class="input-with-unit"><input data-param="anchor_hz" type="number" min="8" max="4000" step="0.001" value="110"><em>Hz</em></span></label>
+          <label><span>Voices</span><select data-param="voice_count"><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option selected>8</option></select></label>
+          <label><span>Roots / voice</span><select data-param="root_density"><option>8</option><option selected>12</option><option>20</option><option>30</option></select></label>
+          <label><span>Root offset</span><input data-param="root_offset" type="number" min="0" max="239" step="1" value="0"></label>
+        </div>
+      </section>
+
+      <section class="rack-section macro-bank">
+        <div class="section-heading"><span>MAC</span><h2>Geometry macros</h2></div>
+        <label class="range-field"><span>Cartan drift <output data-output-for="drift_millirad"></output></span><input data-param="drift_millirad" type="range" min="0" max="240" step="1" value="28"></label>
+        <label class="range-field"><span>Entropy bloom <output data-output-for="bloom_milli"></output></span><input data-param="bloom_milli" type="range" min="0" max="1000" step="1" value="12"></label>
+        <label class="range-field"><span>Root phase gain <output data-output-for="phase_gain_milli"></output></span><input data-param="phase_gain_milli" type="range" min="0" max="2000" step="1" value="300"></label>
+        <label class="range-field"><span>Amplitude geometry <output data-output-for="amplitude_gain_milli"></output></span><input data-param="amplitude_gain_milli" type="range" min="0" max="1200" step="1" value="240"></label>
+        <label class="range-field"><span>Qutrit / ternary bias <output data-output-for="ternary_bias_milli"></output></span><input data-param="ternary_bias_milli" type="range" min="-1000" max="1000" step="1" value="120"></label>
+        <label class="range-field"><span>Sine ↔ triangle <output data-output-for="wave_morph_milli"></output></span><input data-param="wave_morph_milli" type="range" min="0" max="1000" step="1" value="480"></label>
+        <label class="range-field"><span>Triality exchange <output data-output-for="triality_milli"></output></span><input data-param="triality_milli" type="range" min="0" max="1000" step="1" value="180"></label>
+        <label class="range-field"><span>Fractal depth <output data-output-for="fractal_depth"></output></span><input data-param="fractal_depth" type="range" min="1" max="8" step="1" value="5"></label>
+      </section>
+
+      <details class="rack-section" open>
+        <summary><span>SPACE</span><b>Pulse, space &amp; drive</b></summary>
+        <div class="field-grid two details-body">
+          <label><span>Spatial map</span><select data-param="spatial_mode"><option value="near_mono">Near mono</option><option value="torus_field" selected>Torus field</option><option value="orbit">Orbit</option><option value="triality">Triality</option><option value="trinaural">Trinaural</option><option value="qutrit4d">Qutrit 4D</option></select></label>
+          <label><span>Control rate</span><select data-param="control_rate_hz"><option>100</option><option>200</option><option selected>250</option><option>500</option></select></label>
+          <label><span>Pulse rate</span><span class="input-with-unit"><input data-param="pulse_rate_hz" type="number" min="0" max="30" step="0.001" value="0"><em>Hz</em></span></label>
+          <label><span>Haas delay</span><span class="input-with-unit"><input data-param="haas_ms" type="number" min="0" max="30" step="0.1" value="9.5"><em>ms</em></span></label>
+        </div>
+        <label class="range-field"><span>Pulse depth <output data-output-for="pulse_depth_milli"></output></span><input data-param="pulse_depth_milli" type="range" min="0" max="1000" step="1" value="0"></label>
+        <label class="range-field"><span>Stereo width <output data-output-for="width_milli"></output></span><input data-param="width_milli" type="range" min="0" max="1000" step="1" value="520"></label>
+        <label class="range-field"><span>Drive <output data-output-for="drive_milli"></output></span><input data-param="drive_milli" type="range" min="250" max="2500" step="1" value="1080"></label>
+        <label class="range-field"><span>Cross-feedback <output data-output-for="feedback_milli"></output></span><input data-param="feedback_milli" type="range" min="0" max="350" step="1" value="35"></label>
+      </details>
+
+      <details class="rack-section axis-mixer">
+        <summary><span>8D</span><b>Cartan axis mixer</b></summary>
+        <p class="field-note details-body">Weight each Cartan direction without changing the underlying 240-root system.</p>
+        <div class="axis-grid">
+          <label><span>θ1</span><input data-axis="0" type="range" min="0" max="1500" step="1" value="1000"><output data-axis-output="0">1.000</output></label>
+          <label><span>θ2</span><input data-axis="1" type="range" min="0" max="1500" step="1" value="1000"><output data-axis-output="1">1.000</output></label>
+          <label><span>θ3</span><input data-axis="2" type="range" min="0" max="1500" step="1" value="1000"><output data-axis-output="2">1.000</output></label>
+          <label><span>θ4</span><input data-axis="3" type="range" min="0" max="1500" step="1" value="1000"><output data-axis-output="3">1.000</output></label>
+          <label><span>θ5</span><input data-axis="4" type="range" min="0" max="1500" step="1" value="1000"><output data-axis-output="4">1.000</output></label>
+          <label><span>θ6</span><input data-axis="5" type="range" min="0" max="1500" step="1" value="1000"><output data-axis-output="5">1.000</output></label>
+          <label><span>θ7</span><input data-axis="6" type="range" min="0" max="1500" step="1" value="1000"><output data-axis-output="6">1.000</output></label>
+          <label><span>θ8</span><input data-axis="7" type="range" min="0" max="1500" step="1" value="1000"><output data-axis-output="7">1.000</output></label>
+        </div>
+        <button id="reset-axes" type="button">Reset all axes</button>
+      </details>
+    </aside>
+  </main>
+
+  <footer>
+    <span>SPECTRAL · Trent Slade / QSOL-IMC · MIT</span>
+    <span>E8 controls the mapping geometry; it does not make a physical or cosmological claim.</span>
+    <a href="tests/index.html">Run self-tests</a>
+  </footer>
+
+  <script src="js/core.js" defer></script>
+  <script src="js/audio.js" defer></script>
+  <script src="js/engine.js" defer></script>
+  <script src="js/provenance.js" defer></script>
+  <script src="js/visuals.js" defer></script>
+  <script src="js/ui.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
