@@ -155,7 +155,7 @@ Potential uses include scientific and engineering data sonification, accessibili
 ## Creator
 
 **Trent Slade**  
-QSOL-IMC / LostSound Technologies  
+QSOL-IMC 
 ORCID: [0009-0002-4515-9237](https://orcid.org/0009-0002-4515-9237)
 
 ## License
