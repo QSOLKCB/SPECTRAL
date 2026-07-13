@@ -15,7 +15,7 @@ The repository combines five zero-install browser applications with Python resea
 
 | Area | Description |
 |---|---|
-| [APP](APP/) | Browser-native **SPECTRAL Deterministic Sonification Workbench 2.0**. Open `APP/index.html` directlyâ€”no server, Node, npm, build system, or network connection required. Supports Canonical Strict and Replay Safe determinism modes, WAV export, fingerprints, manifests, hashes, and derivative-lineage documentation. |
+| [APP](APP/) | Browser-native **SPECTRAL Deterministic Sonification Workbench 2.0**. Open `APP/index.html` directly. No server, Node, npm, build system, or network connection required. Supports Canonical Strict and Replay Safe determinism modes, WAV export, fingerprints, manifests, hashes, and derivative-lineage documentation. |
 | [E8/APP](E8/APP/) | Browser-native **SPECTRAL E8 Geometry Studio 1.0**. A fast musical instrument for exploring all 240 E8 roots across an evolving eight-dimensional Cartan torus, with Canonical Deterministic, Replay-Safe, and explicitly Non-Deterministic Creative modes, long-form WAV rendering, scene morphing, spatial variants, and provenance bundles. |
 | [E8](E8/) | E8-inspired signal generators, astronomical-data sonification, triality/φ mappings, QEC-oriented event mapping, WAV material, experimental visualization code, and the E8 Geometry Studio above. |
 | [SMBH](SMBH/) | Browser-native **SPECTRAL Photon-Sphere Sonification Laboratory 1.0**. Sonifies photon-sphere and whispering-gallery mode relationships from a curved optical black-hole analogue, with a clearly separate Kerr 220 extension, Canonical Strict and Replay Safe modes, WAV/provenance export, and explicit scientific claim boundaries. |
