@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; connect-src 'none'; img-src 'self' data: blob:; media-src 'self' data: blob:; object-src 'none'; frame-src 'none'; font-src 'self'; script-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>RB-420 Acid Tracker Workstation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <noscript><div class="fatal">RB-420 requires JavaScript. Everything runs locally in this browser.</div></noscript>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-badge" aria-hidden="true">420</div>
+      <div>
+        <p class="eyebrow">SPECTRAL INSTRUMENTS</p>
+        <h1>RB-420</h1>
+        <p class="subtitle">Acid Tracker Workstation <span class="version">1.0.0</span></p>
+      </div>
+    </div>
+    <div class="global-strip" aria-label="Global transport">
+      <button id="transport-play" class="transport primary" type="button" aria-label="Play">▶ PLAY</button>
+      <button id="transport-stop" class="transport" type="button" aria-label="Stop">■ STOP</button>
+      <label class="compact-field">BPM
+        <input id="tempo" type="number" min="40" max="250" value="128" inputmode="numeric">
+      </label>
+      <label class="compact-field">SWING
+        <input id="swing" type="range" min="0" max="60" value="0">
+        <output id="swing-value">0%</output>
+      </label>
+      <label class="compact-field">MASTER
+        <input id="master-volume" type="range" min="0" max="100" value="78">
+        <output id="master-value">78</output>
+      </label>
+      <label class="compact-field">SEED
+        <input id="global-seed" type="number" min="1" max="4294967295" value="420338">
+      </label>
+      <div class="meter" aria-label="Master level"><i id="meter-fill"></i></div>
+    </div>
+  </header>
+
+  <nav class="workstation-tabs" aria-label="Workstation sections">
+    <button class="tab is-active" data-tab="groovebox" type="button"><span>01</span> GROOVEBOX</button>
+    <button class="tab" data-tab="pattern" type="button"><span>02</span> PATTERN MASTER</button>
+    <button class="tab" data-tab="recorder" type="button"><span>03</span> LOOP RECORDER</button>
+    <button class="tab" data-tab="tracker" type="button"><span>04</span> TRACKER</button>
+    <button class="tab" data-tab="soundlab" type="button"><span>05</span> SOUND LAB</button>
+    <button class="tab" data-tab="project" type="button"><span>06</span> PROJECT</button>
+  </nav>
+
+  <main>
+    <section id="panel-groovebox" class="panel is-active" data-panel="groovebox">
+      <div class="panel-heading">
+        <div>
+          <p class="kicker">DUAL ACID + 808/909 RHYTHM</p>
+          <h2>Groovebox</h2>
+        </div>
+        <div class="heading-actions">
+          <button id="demo-pattern" type="button">LOAD DEMO</button>
+          <button id="mutate-pattern" type="button">SEEDED MUTATION</button>
+          <button id="undo" type="button" title="Undo (Ctrl+Z)">UNDO</button>
+          <button id="redo" type="button" title="Redo (Ctrl+Shift+Z)">REDO</button>
+        </div>
+      </div>
+
+      <div class="machine-layout">
+        <article class="machine acid-machine" data-acid="0">
+          <header class="machine-head">
+            <div><span class="unit-led"></span><strong>ACID A</strong><small>MONO BASSLINE</small></div>
+            <div class="machine-actions">
+              <button class="mini-toggle mute-toggle" data-machine-mute="acidA" type="button">MUTE</button>
+              <button class="mini-toggle solo-toggle" data-machine-solo="acidA" type="button">SOLO</button>
+            </div>
+          </header>
+          <div class="control-bank" id="acid-a-controls">
+            <label>CUTOFF<input data-acid-param="cutoff" type="range" min="0" max="100" value="58"><output>58</output></label>
+            <label>RESONANCE<input data-acid-param="resonance" type="range" min="0" max="100" value="72"><output>72</output></label>
+            <label>ENV MOD<input data-acid-param="envMod" type="range" min="0" max="100" value="64"><output>64</output></label>
+            <label>DECAY<input data-acid-param="decay" type="range" min="0" max="100" value="54"><output>54</output></label>
+            <label>ACCENT<input data-acid-param="accent" type="range" min="0" max="100" value="76"><output>76</output></label>
+            <label>LEVEL<input data-acid-param="volume" type="range" min="0" max="100" value="76"><output>76</output></label>
+          </div>
+          <div class="wave-select" role="group" aria-label="Acid A waveform">
+            <button class="is-active" data-wave="saw" type="button">SAW</button>
+            <button data-wave="square" type="button">SQUARE</button>
+          </div>
+          <div class="step-caption"><span>STEP SEQUENCER</span><span>CLICK = NOTE · SHIFT = ACCENT · ALT = SLIDE</span></div>
+          <div id="acid-a-steps" class="step-grid acid-steps" aria-label="Acid A pattern"></div>
+        </article>
+
+        <article class="machine acid-machine" data-acid="1">
+          <header class="machine-head">
+            <div><span class="unit-led"></span><strong>ACID B</strong><small>COUNTER LINE</small></div>
+            <div class="machine-actions">
+              <button class="mini-toggle mute-toggle" data-machine-mute="acidB" type="button">MUTE</button>
+              <button class="mini-toggle solo-toggle" data-machine-solo="acidB" type="button">SOLO</button>
+            </div>
+          </header>
+          <div class="control-bank" id="acid-b-controls">
+            <label>CUTOFF<input data-acid-param="cutoff" type="range" min="0" max="100" value="44"><output>44</output></label>
+            <label>RESONANCE<input data-acid-param="resonance" type="range" min="0" max="100" value="60"><output>60</output></label>
+            <label>ENV MOD<input data-acid-param="envMod" type="range" min="0" max="100" value="46"><output>46</output></label>
+            <label>DECAY<input data-acid-param="decay" type="range" min="0" max="100" value="68"><output>68</output></label>
+            <label>ACCENT<input data-acid-param="accent" type="range" min="0" max="100" value="62"><output>62</output></label>
+            <label>LEVEL<input data-acid-param="volume" type="range" min="0" max="100" value="65"><output>65</output></label>
+          </div>
+          <div class="wave-select" role="group" aria-label="Acid B waveform">
+            <button data-wave="saw" type="button">SAW</button>
+            <button class="is-active" data-wave="square" type="button">SQUARE</button>
+          </div>
+          <div class="step-caption"><span>STEP SEQUENCER</span><span>CLICK = NOTE · SHIFT = ACCENT · ALT = SLIDE</span></div>
+          <div id="acid-b-steps" class="step-grid acid-steps" aria-label="Acid B pattern"></div>
+        </article>
+
+        <article class="machine drum-machine wide-machine">
+          <header class="machine-head">
+            <div><span class="unit-led"></span><strong>RHYTHM SECTION</strong><small>ALGORITHMIC 808 / 909 VOICES — NO SAMPLES</small></div>
+            <div class="kit-switch" role="group" aria-label="Drum kit">
+              <button class="is-active" data-kit="808" type="button">808</button>
+              <button data-kit="909" type="button">909</button>
+              <button class="mini-toggle mute-toggle" data-machine-mute="drums" type="button">MUTE</button>
+            </div>
+          </header>
+          <div class="drum-toolbar">
+            <label>DRUM LEVEL<input id="drum-volume" type="range" min="0" max="100" value="82"><output>82</output></label>
+            <label>DRIVE<input id="drum-drive" type="range" min="0" max="100" value="28"><output>28</output></label>
+            <label>HUMANIZE<input id="drum-humanize" type="range" min="0" max="20" value="0"><output>0</output></label>
+            <label>EUCLIDEAN HITS<input id="euclid-hits" type="number" min="1" max="16" value="5"></label>
+            <select id="euclid-lane" aria-label="Euclidean target lane">
+              <option value="kick">KICK</option><option value="snare">SNARE</option><option value="closedHat">CLOSED HAT</option><option value="openHat">OPEN HAT</option><option value="clap">CLAP</option><option value="rim">RIM</option>
+            </select>
+            <button id="apply-euclid" type="button">GENERATE EUCLIDEAN</button>
+          </div>
+          <div id="drum-grid" class="drum-grid" aria-label="Drum patterns"></div>
+        </article>
+
+        <article class="machine fx-machine wide-machine">
+          <header class="machine-head">
+            <div><span class="unit-led"></span><strong>MASTER EFFECTS</strong><small>DRIVE · PATTERN FILTER · DELAY · DYNAMICS</small></div>
+            <button class="mini-toggle" id="fx-bypass" type="button">BYPASS</button>
+          </header>
+          <div class="control-bank fx-bank">
+            <label>DISTORTION<input id="fx-distortion" type="range" min="0" max="100" value="34"><output>34</output></label>
+            <label>PCF CUTOFF<input id="fx-filter" type="range" min="0" max="100" value="72"><output>72</output></label>
+            <label>DELAY TIME<input id="fx-delay-time" type="range" min="1" max="75" value="32"><output>32</output></label>
+            <label>FEEDBACK<input id="fx-feedback" type="range" min="0" max="90" value="38"><output>38</output></label>
+            <label>DELAY MIX<input id="fx-delay-mix" type="range" min="0" max="70" value="22"><output>22</output></label>
+            <label>COMPRESS<input id="fx-compression" type="range" min="0" max="100" value="48"><output>48</output></label>
+          </div>
+          <canvas id="scope" class="scope" width="1200" height="130" aria-label="Live output oscilloscope"></canvas>
+        </article>
+      </div>
+    </section>
+
+    <section id="panel-pattern" class="panel" data-panel="pattern">
+      <div class="panel-heading">
+        <div><p class="kicker">PIANO-ROLL ACID PROGRAMMING</p><h2>Pattern Master</h2></div>
+        <div class="heading-actions">
+          <button id="pattern-copy" type="button">COPY</button>
+          <button id="pattern-paste" type="button">PASTE</button>
+          <button id="pattern-clear" type="button">CLEAR</button>
+          <button id="pattern-export" type="button">EXPORT PATTERN</button>
+          <button id="pattern-import" type="button">IMPORT PATTERN</button>
+        </div>
+      </div>
+      <div class="editor-toolbar">
+        <label>EDIT MACHINE<select id="pattern-machine"><option value="0">ACID A</option><option value="1">ACID B</option></select></label>
+        <label>ROOT NOTE<select id="pattern-root"><option value="36">C2</option><option value="40">E2</option><option value="43">G2</option><option value="48" selected>C3</option></select></label>
+        <label>VISIBLE OCTAVES<select id="pattern-octaves"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select></label>
+        <label>TRANSPOSE<select id="pattern-transpose"><option value="-12">−12</option><option value="-7">−7</option><option value="0" selected>0</option><option value="7">+7</option><option value="12">+12</option></select></label>
+        <button id="pattern-apply-transpose" type="button">APPLY</button>
+        <button id="pattern-randomize" type="button">SEEDED VARIATION</button>
+      </div>
+      <div class="piano-roll-shell">
+        <canvas id="piano-roll" width="1400" height="620" aria-label="Visual piano roll. Click cells to add or remove notes."></canvas>
+      </div>
+      <div class="pattern-inspector">
+        <div><span>SELECTED STEP</span><strong id="selected-step-label">01</strong></div>
+        <label>NOTE<select id="inspector-note"></select></label>
+        <button id="inspector-gate" class="is-active" type="button">GATE</button>
+        <button id="inspector-accent" type="button">ACCENT</button>
+        <button id="inspector-slide" type="button">SLIDE</button>
+        <button id="inspector-delete" type="button">DELETE NOTE</button>
+      </div>
+      <div class="info-banner">
+        <strong>FORMAT NOTE</strong>
+        <p>This editor intentionally saves open, human-readable <code>.rb420-pattern.json</code> files. Original ReBirth <code>.rbs</code> is a separate binary song container; RB-420 does not pretend its JSON is compatible.</p>
+      </div>
+    </section>
+
+    <section id="panel-recorder" class="panel" data-panel="recorder">
+      <div class="panel-heading">
+        <div><p class="kicker">PCM LOOP CAPTURE</p><h2>30-Second Loop Recorder</h2></div>
+        <span id="recorder-badge" class="status-badge">READY</span>
+      </div>
+      <div class="recorder-mode-grid">
+        <label class="mode-card is-selected">
+          <input type="radio" name="record-mode" value="deterministic" checked>
+          <span class="mode-icon">D</span>
+          <span><strong>DETERMINISTIC RENDER</strong><small>Freezes project state, seed, BPM, swing and PCM settings. Same recipe → same loop.</small></span>
+        </label>
+        <label class="mode-card">
+          <input type="radio" name="record-mode" value="live">
+          <span class="mode-icon live-icon">●</span>
+          <span><strong>LIVE PERFORMANCE</strong><small>Captures knob moves, mutes, pattern edits, pad hits and improvisation as performed.</small></span>
+        </label>
+      </div>
+      <div class="recorder-console">
+        <div class="record-controls">
+          <label>DURATION
+            <input id="record-duration" type="range" min="1" max="30" value="30">
+            <output id="record-duration-value">30.0 s</output>
+          </label>
+          <label>FIXED RATE
+            <select id="record-rate"><option value="44100">44.1 kHz</option><option value="48000">48 kHz</option></select>
+          </label>
+          <button id="record-start" class="record-button" type="button"><span></span> RENDER LOOP</button>
+          <button id="record-stop" type="button" disabled>STOP CAPTURE</button>
+        </div>
+        <div class="progress-track"><i id="record-progress"></i></div>
+        <canvas id="record-waveform" class="waveform" width="1400" height="260" aria-label="Recorded loop waveform"></canvas>
+        <div id="record-meta" class="record-meta">No loop recorded yet.</div>
+        <div class="loop-actions">
+          <button id="loop-preview" type="button" disabled>▶ PREVIEW</button>
+          <button id="loop-download" type="button" disabled>DOWNLOAD WAV</button>
+          <button id="recipe-download" type="button" disabled>DOWNLOAD RECIPE</button>
+          <button id="loop-to-tracker" class="primary" type="button" disabled>SEND TO TRACKER</button>
+          <button id="loop-to-sample" type="button" disabled>SEND TO SOUND LAB</button>
+        </div>
+      </div>
+      <details class="recipe-details">
+        <summary>Deterministic recipe preview</summary>
+        <pre id="recipe-preview">A recipe appears after deterministic rendering.</pre>
+      </details>
+    </section>
+
+    <section id="panel-tracker" class="panel tracker-panel" data-panel="tracker">
+      <div class="panel-heading">
+        <div><p class="kicker">IMPULSE-STYLE KEYBOARD WORKFLOW</p><h2>Tracker</h2></div>
+        <div class="heading-actions">
+          <button id="tracker-clear" type="button">CLEAR PATTERN</button>
+          <button id="tracker-import-audio" type="button">IMPORT SAMPLE</button>
+          <button id="tracker-render" type="button">RENDER TRACKER LOOP</button>
+        </div>
+      </div>
+      <div class="tracker-topline">
+        <div class="order-list">
+          <strong>ORDER</strong><button class="is-active" type="button">00 · PATTERN 00</button><button type="button">01 · ---</button><button type="button">02 · ---</button>
+        </div>
+        <div class="sample-rack">
+          <div class="sample-rack-head"><strong>SAMPLE / INSTRUMENT RACK</strong><span id="sample-count">0 / 16 loaded</span></div>
+          <div id="sample-slots" class="sample-slots"></div>
+        </div>
+      </div>
+      <div class="tracker-help"><span>Click a NOTE cell, then use QWERTY piano keys</span><span>Delete clears · Arrow keys move · Space starts/stops</span><span>Columns: NOTE · INS · VOL · FX</span></div>
+      <div id="tracker-grid" class="tracker-grid" role="grid" aria-label="8-channel tracker pattern"></div>
+      <div class="tracker-footer">
+        <label>ROWS<select id="tracker-rows"><option value="32">32</option><option value="64" selected>64</option></select></label>
+        <label>ROWS / BEAT<select id="tracker-speed"><option value="2">2</option><option value="4" selected>4</option><option value="8">8</option></select></label>
+        <label>TRACKER LEVEL<input id="tracker-volume" type="range" min="0" max="100" value="78"><output>78</output></label>
+        <span id="tracker-position">ROW 00 / 64</span>
+      </div>
+    </section>
+
+    <section id="panel-soundlab" class="panel" data-panel="soundlab">
+      <div class="panel-heading">
+        <div><p class="kicker">SEEDED INSTRUMENT & LOOP FORGE</p><h2>Sound Lab</h2></div>
+        <div class="heading-actions"><button id="sound-randomize" type="button">NEW SEED</button><button id="sound-generate" class="primary" type="button">GENERATE LOOP</button></div>
+      </div>
+      <div class="soundlab-layout">
+        <div class="sound-config machine">
+          <h3>LOOP DNA</h3>
+          <div class="form-grid">
+            <label>STYLE<select id="sound-style"><option value="acid-rock">ACID ROCK</option><option value="machine-funk">MACHINE FUNK</option><option value="dark-country">DARK COUNTRY</option><option value="industrial">INDUSTRIAL</option><option value="tracker-core">TRACKER CORE</option></select></label>
+            <label>ROOT<select id="sound-root"><option value="36">C</option><option value="38">D</option><option value="40">E</option><option value="41">F</option><option value="43">G</option><option value="45">A</option><option value="47">B</option></select></label>
+            <label>SCALE<select id="sound-scale"><option value="minor">MINOR</option><option value="dorian">DORIAN</option><option value="phrygian">PHRYGIAN</option><option value="pentatonic">PENTATONIC</option><option value="chromatic">CHROMATIC</option></select></label>
+            <label>BARS<select id="sound-bars"><option value="1">1</option><option value="2" selected>2</option><option value="4">4</option></select></label>
+            <label>SEED<input id="sound-seed" type="number" min="1" max="4294967295" value="6581420"></label>
+            <label>OCTAVE<select id="sound-octave"><option value="-12">LOW</option><option value="0" selected>MID</option><option value="12">HIGH</option></select></label>
+          </div>
+        </div>
+        <div class="sound-mixer machine">
+          <h3>VOICE BLEND</h3>
+          <div class="control-bank sound-bank">
+            <label>PLUCKED GUITAR<input id="sound-guitar" type="range" min="0" max="100" value="70"><output>70</output></label>
+            <label>ANALOG SYNTH<input id="sound-synth" type="range" min="0" max="100" value="64"><output>64</output></label>
+            <label>SUB BASS<input id="sound-bass" type="range" min="0" max="100" value="48"><output>48</output></label>
+            <label>METAL TEXTURE<input id="sound-texture" type="range" min="0" max="100" value="22"><output>22</output></label>
+            <label>DRIVE<input id="sound-drive" type="range" min="0" max="100" value="38"><output>38</output></label>
+            <label>SPACE<input id="sound-space" type="range" min="0" max="100" value="20"><output>20</output></label>
+          </div>
+        </div>
+      </div>
+      <canvas id="sound-waveform" class="waveform sound-waveform" width="1400" height="280" aria-label="Generated Sound Lab loop waveform"></canvas>
+      <div id="sound-meta" class="record-meta">Choose a style and generate a deterministic guitar/synth loop.</div>
+      <div class="loop-actions">
+        <button id="sound-preview" type="button" disabled>▶ PREVIEW</button>
+        <button id="sound-download" type="button" disabled>DOWNLOAD WAV</button>
+        <button id="sound-to-tracker" class="primary" type="button" disabled>SEND TO TRACKER</button>
+      </div>
+    </section>
+
+    <section id="panel-project" class="panel" data-panel="project">
+      <div class="panel-heading">
+        <div><p class="kicker">LOCAL-FIRST PROJECT CONTROL</p><h2>Project & Documentation</h2></div>
+        <div class="heading-actions"><button id="project-new" type="button">NEW</button><button id="project-load" type="button">LOAD PROJECT</button><button id="project-save" class="primary" type="button">SAVE PROJECT</button></div>
+      </div>
+      <div class="project-grid">
+        <article class="doc-card"><span>01</span><h3>Zero install</h3><p>Open <code>index.html</code> directly. No server, Node, npm, build step, framework, CDN, telemetry, cookies or network requests.</p></article>
+        <article class="doc-card"><span>02</span><h3>Original synthesis</h3><p>Acid voices and drum sounds are synthesized in the browser. The bundle contains no Roland, ReBirth, Impulse Tracker or commercial sample assets.</p></article>
+        <article class="doc-card"><span>03</span><h3>Two recorder contracts</h3><p>Deterministic Render freezes a recipe and uses seeded PCM synthesis. Live Capture records the actual browser performance and is intentionally take-specific.</p></article>
+        <article class="doc-card"><span>04</span><h3>Tracker bridge</h3><p>Rendered, recorded and imported loops become tracker instruments. Sequence them in the 8-channel Impulse-style grid, then render another loop.</p></article>
+        <article class="doc-card"><span>05</span><h3>Open formats</h3><p>Projects and patterns are JSON; audio is PCM16 WAV. Native RB-420 files do not masquerade as proprietary <code>.rbs</code> or <code>.it</code> files.</p></article>
+        <article class="doc-card"><span>06</span><h3>Creative utilities</h3><p>Seeded mutation, Euclidean rhythm generation, waveform scopes, sample import, project export, keyboard entry and the guitar/synth Sound Lab are included.</p></article>
+      </div>
+      <div class="project-details machine">
+        <h3>CURRENT PROJECT</h3>
+        <div class="form-grid">
+          <label>PROJECT NAME<input id="project-name" type="text" maxlength="80" value="RB-420 Session"></label>
+          <label>AUTHOR<input id="project-author" type="text" maxlength="80" value="Trent Slade / QSOL-IMC"></label>
+        </div>
+        <label>NOTES<textarea id="project-notes" rows="5" placeholder="Track concept, sample provenance, arrangement notes…"></textarea></label>
+        <div id="project-summary" class="project-summary"></div>
+      </div>
+      <div class="legal-note">
+        <strong>Independent instrument</strong>
+        <p>RB-420 is an original browser workstation inspired by classic acid grooveboxes and tracker workflows. It is not affiliated with or endorsed by Reason Studios, Roland, Schism Tracker, or the authors of Pattern Master. Product names are used descriptively.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="statusbar">
+    <span id="app-status"><i></i> AUDIO OFFLINE — PRESS PLAY TO INITIALIZE</span>
+    <span id="play-position">PAT 00 · STEP 01 · ROW 00</span>
+    <span>LOCAL ONLY · NETWORK DISABLED</span>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <input id="pattern-file" type="file" accept=".json,.rb420-pattern.json,application/json" hidden>
+  <input id="project-file" type="file" accept=".json,.rb420.json,application/json" hidden>
+  <input id="audio-file" type="file" accept="audio/*,.wav,.aiff,.aif,.mp3,.ogg,.flac" hidden>
+
+  <script src="js/dsp.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
