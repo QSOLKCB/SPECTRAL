@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; connect-src 'none'; img-src 'self' data: blob:; media-src 'self' data: blob:; object-src 'none'; frame-src 'none'; font-src 'self'; script-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>RB-420 Browser Tests</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <main class="test-shell">
+    <header class="panel-heading">
+      <div><p class="kicker">BROWSER-NATIVE VERIFICATION</p><h1>RB-420 DSP Tests</h1></div>
+      <span id="test-status" class="status-badge">RUNNING</span>
+    </header>
+    <section class="machine test-panel">
+      <div id="test-summary" class="project-summary">Initializing deterministic renderer…</div>
+      <ol id="test-results" class="test-results"></ol>
+    </section>
+    <p><a class="test-back" href="../index.html">← Return to RB-420</a></p>
+  </main>
+  <script src="../js/dsp.js"></script>
+  <script src="tests.js"></script>
+</body>
+</html>
