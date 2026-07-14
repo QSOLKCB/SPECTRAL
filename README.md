@@ -9,7 +9,7 @@
 
 SPECTRAL is an experimental research and development repository by **Trent Slade / QSOL-IMC**. It explores deterministic, replay-aware, and explicitly creative mappings between data, symbolic structures, mathematical symmetry, signal synthesis, time-frequency analysis, three-dimensional visualization, and audible perception.
 
-The repository combines five zero-install browser applications with Python research scripts, reproducible audio artifacts, visualization experiments, and provenance-oriented workflows. The browser applications run directly from their folders without a server, build system, package manager, cloud service, or network connection.
+The repository combines six zero-install browser applications with Python research scripts, reproducible audio artifacts, visualization experiments, and provenance-oriented workflows. The browser applications run directly from their folders without a server, build system, package manager, cloud service, or network connection.
 
 ## Project areas
 
@@ -20,6 +20,7 @@ The repository combines five zero-install browser applications with Python resea
 | [E8](E8/) | E8-inspired signal generators, astronomical-data sonification, triality/φ mappings, QEC-oriented event mapping, WAV material, experimental visualization code, and the E8 Geometry Studio above. |
 | [SMBH](SMBH/) | Browser-native **SPECTRAL Photon-Sphere Sonification Laboratory 1.0**. Sonifies photon-sphere and whispering-gallery mode relationships from a curved optical black-hole analogue, with a clearly separate Kerr 220 extension, Canonical Strict and Replay Safe modes, WAV/provenance export, and explicit scientific claim boundaries. |
 | [QEC/APP](QEC/APP/) | Browser-native **SPECTRAL QEC Sonification Laboratory 1.0**. Uses a Render → Commit → Reveal protocol to sonify Bell, GHZ, W, qutrit, repetition, perfect, Steane, surface-code, and sparse QLDPC models or local QEC event datasets, with deterministic WAV, manifest, event-stream, observation-receipt, and bundle exports. |
+| [rb-420](rb-420/) | Browser-native **RB-420 Acid Tracker Workstation 1.0**. An original dual-acid groovebox and algorithmic 808/909 rhythm workstation with a Pattern Master piano roll, deterministic and live 30-second PCM recording, an eight-channel Impulse-style tracker, seeded guitar/synth Sound Lab, WAV/recipe/project export, and no build or network requirements. |
 | [OMI-ISA](OMI-ISA/) | OMI/XOR/E8 sonification experiments, including XOR-ring and fractal-cosmovirus mappings. |
 | [PHOTOACOUSTIC](PHOTOACOUSTIC/) | Browser-native **SPECTRAL Photoacoustic Laboratory 2.0**. A deterministic light-to-sound model and music generator that maps synthetic or local WAV-derived light intensity through explicit optical, thermal, pressure, and resonator stages. |
 | [SONIFICATION](SONIFICATION/) | Scripts, datasets, audio, figures, and supporting material associated with the receipt-bound deterministic information-lattice sonification research cited below. |
@@ -40,6 +41,7 @@ APP/index.html                 Deterministic Sonification Workbench 2.0
 E8/APP/index.html              E8 Geometry Studio 1.0
 SMBH/index.html                Photon-Sphere Sonification Laboratory 1.0
 QEC/APP/index.html             QEC Sonification Laboratory 1.0
+rb-420/index.html              RB-420 Acid Tracker Workstation 1.0
 PHOTOACOUSTIC/index.html       Photoacoustic Laboratory 2.0
 ```
 
@@ -50,10 +52,11 @@ APP/tests/index.html
 E8/APP/tests/index.html
 SMBH/tests/index.html
 QEC/APP/tests/index.html
+rb-420/tests/index.html
 PHOTOACOUSTIC/tests/index.html
 ```
 
-See the [Workbench README](APP/README.md), [E8 Geometry Studio README](E8/APP/README.md), [Photon-Sphere Laboratory README](SMBH/README.md), [QEC Sonification Laboratory README](QEC/APP/README.md), and [Photoacoustic Laboratory README](PHOTOACOUSTIC/README.md) for their mappings, determinism contracts, export artifacts, replay rules, privacy boundaries, and acceptance tests.
+See the [Workbench README](APP/README.md), [E8 Geometry Studio README](E8/APP/README.md), [Photon-Sphere Laboratory README](SMBH/README.md), [QEC Sonification Laboratory README](QEC/APP/README.md), [RB-420 README](rb-420/README.md), and [Photoacoustic Laboratory README](PHOTOACOUSTIC/README.md) for their mappings, determinism contracts, export artifacts, replay rules, privacy boundaries, and acceptance tests.
 
 ### Python experiments
 
