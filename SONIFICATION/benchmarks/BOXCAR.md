@@ -4,7 +4,7 @@ This change is private to `SONIFICATION/sonify_v1.2.py`. It does not modify the 
 
 ## Contract
 
-The original `np.convolve(noise, np.ones(60)/60, mode='same')` remains the fallback. Only C-contiguous one-dimensional native float64 NumPy arrays, length 8192 through 1,440,000 inclusive, whose minimum and maximum are within [-1,1], use the optimized path. Min/max comparisons reject NaN and infinity. Other dtypes, layouts, dimensions, sizes and amplitudes retain the original computation, output shape, dtype and exception behavior. In particular N<60 still returns NumPy's length-60 result for nonempty input. Empty input still raises.
+The original `np.convolve(noise, np.ones(60)/60, mode='same')` remains the fallback. Only plain (not subclassed), C-contiguous one-dimensional native float64 NumPy arrays, length 8192 through 1,440,000 inclusive, whose minimum and maximum are within [-1,1], use the optimized path. Min/max comparisons reject NaN and infinity. Array subclasses (including masked arrays), other dtypes, layouts, dimensions, sizes and amplitudes retain the original computation, output shape, dtype and exception behavior. In particular N<60 still returns NumPy's length-60 result for nonempty input. Empty input still raises.
 
 The fixed width is 60. Output i averages input indices i-30 through i+29 inclusive, padding out-of-range positions with zero. A float64 prefix sum resets every 8192 output samples, using 59 overlapping inputs. This bounds cumulative-sum history to 8251 samples. No new runtime dependency is added.
 
@@ -46,3 +46,9 @@ The running-sum identity is related to the integrator/comb construction in E. B.
 See adjacent dated JSON receipts for complete raw timings, order, environment, source/harness hashes, memory counts and unchanged artifact checks. These measurements cover two NumPy versions on the same Linux host, not two independent machines or all platforms. They supersede neither historical research evidence nor future deployment measurements.
 
 On this host, NumPy 2.3.5 median whole-compute time fell from 314.296 to 301.610 ms (4.04%); NumPy 2.2.6 fell from 317.827 to 305.748 ms (3.80%). Both retained exact baseline PCM/WAV. Bootstrap 95% median-ratio intervals were [1.0311, 1.0562] and [1.0307, 1.0472], respectively. The measured filter traced-allocation peak rose from 11,521,488 to 23,249,590 bytes. This roughly 11.7 MB extra allocation is an explicit tradeoff for the bounded compute gain, not a memory optimization.
+
+The `-r2` receipts validate the tightened exact-ndarray guard. Earlier receipts are retained unchanged as historical measurements and name their original source SHA256. Subclasses use fallback because overridden reductions (e.g. masked min/max) can hide values outside the bound.
+
+Final r2 NumPy 2.3.5: 310.968→298.793 ms (3.92% lower), bootstrap median ratio interval [1.027693614765127, 1.0555346651962618]. Exact baseline PCM/WAV retained.
+
+Final r2 NumPy 2.2.6: 334.052→319.757 ms (4.28% lower), bootstrap median ratio interval [1.0277794618036025, 1.0606775911172437]. Exact baseline PCM/WAV retained.

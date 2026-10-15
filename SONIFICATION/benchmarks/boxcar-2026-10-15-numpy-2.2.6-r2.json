@@ -1,0 +1,656 @@
+{
+  "schema": "spectral-boxcar-v1",
+  "baseline_commit": "5265b7f130287f80b5cf0d3de5bb2953152f90cd",
+  "baseline_git_blob": "42a2c6564136f9aa24fe97de300aace00b822e7d",
+  "source_sha256": "548a1e6418c9ae45553ce69af4d30dea9b972df2f8c0e019608d75868b440b03",
+  "harness_sha256": "357fb40ce6c5cf1ea43aed88ae73ef7712f9af62bcea1273614767c755804ecf",
+  "support_sha256": "e84afa56ca409c646eaa1d41391cd24a6cfbe18e1bc782ecd242cc5038a693ab",
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "numpy": "2.2.6",
+    "scipy": "1.17.0",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "cpu_count": 9,
+    "threads": {
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1"
+    }
+  },
+  "repeats": 31,
+  "outputs": {
+    "direct": {
+      "pcm_sha256": "429b4ead52dc15453faa67fb2312f970333bb6b116016c8fc4a093127e292e44",
+      "wav_sha256": "a6caa42c91ae3ffd5d60c81a3ea56566c17f671b8833bd97e394a1366b354957",
+      "wav_bytes": 5760058
+    },
+    "bounded": {
+      "pcm_sha256": "429b4ead52dc15453faa67fb2312f970333bb6b116016c8fc4a093127e292e44",
+      "wav_sha256": "a6caa42c91ae3ffd5d60c81a3ea56566c17f671b8833bd97e394a1366b354957",
+      "wav_bytes": 5760058
+    }
+  },
+  "scope": "Whole compute includes all source synthesis, helper eligibility scans, allocations, output float32 conversion and destruction. Excludes imports, process startup, WAV serialization and filesystem I/O. Stage speedup is not whole-compute speedup. Bootstrap estimates observed run variability, not portability.",
+  "whole_compute": {
+    "raw_ms": {
+      "direct": [
+        331.738491,
+        327.764809,
+        327.018828,
+        320.423769,
+        331.610921,
+        331.471881,
+        334.173584,
+        358.58806,
+        334.585934,
+        330.279962,
+        334.149388,
+        324.734668,
+        327.020469,
+        324.826746,
+        320.142088,
+        339.200314,
+        338.052085,
+        371.635466,
+        348.309904,
+        354.408971,
+        367.936218,
+        343.653755,
+        342.218125,
+        329.362257,
+        320.767792,
+        335.503404,
+        327.392143,
+        334.051733,
+        323.948833,
+        342.274662,
+        346.630819
+      ],
+      "bounded": [
+        314.364751,
+        314.711246,
+        308.164891,
+        318.713328,
+        313.295378,
+        332.231625,
+        324.786635,
+        332.702464,
+        312.920044,
+        315.509175,
+        322.112261,
+        320.146865,
+        317.457263,
+        322.2103,
+        319.979711,
+        322.508112,
+        316.762625,
+        327.850831,
+        341.967366,
+        336.242106,
+        323.328401,
+        314.853916,
+        318.839405,
+        321.35295,
+        307.475517,
+        312.995249,
+        342.131146,
+        307.750389,
+        322.624006,
+        312.315404,
+        319.757403
+      ]
+    },
+    "order": [
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ]
+    ],
+    "median_ms": {
+      "direct": 334.051733,
+      "bounded": 319.757403
+    },
+    "median_ratio": 1.0447036718020881,
+    "median_elapsed_reduction_percent": 4.279076738093135,
+    "paired_bootstrap_ratio_95_interval": [
+      1.0277794618036025,
+      1.0606775911172437
+    ]
+  },
+  "filter": {
+    "raw_ms": {
+      "direct": [
+        20.096994,
+        20.013587,
+        19.099279,
+        20.914431,
+        20.490653,
+        20.185949,
+        19.69642,
+        19.399461,
+        19.445945,
+        20.039916,
+        22.757906,
+        19.89636,
+        18.898266,
+        18.519277,
+        19.292704,
+        18.447865,
+        19.728584,
+        20.278101,
+        18.493312,
+        20.836238,
+        18.605244,
+        19.904201,
+        18.867374,
+        19.723605,
+        19.163917,
+        21.291027,
+        20.36725,
+        23.941823,
+        20.679011,
+        25.937482,
+        19.802963
+      ],
+      "bounded": [
+        10.783867,
+        8.300945,
+        8.244064,
+        8.458899,
+        8.204682,
+        8.340335,
+        8.837631,
+        8.378651,
+        8.27555,
+        8.467881,
+        8.19011,
+        9.565494,
+        8.575859,
+        8.846101,
+        8.650815,
+        8.366081,
+        8.642294,
+        8.586518,
+        9.030389,
+        8.386656,
+        8.288397,
+        8.245115,
+        8.097875,
+        8.591813,
+        8.909658,
+        15.448238,
+        14.959004,
+        8.500858,
+        9.445572,
+        9.534419,
+        11.822437
+      ]
+    },
+    "order": [
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ]
+    ],
+    "median_ms": {
+      "direct": 19.89636,
+      "bounded": 8.575859
+    },
+    "median_ratio": 2.3200428085396463,
+    "median_elapsed_reduction_percent": 56.89734705242567,
+    "paired_bootstrap_ratio_95_interval": [
+      2.240754677356409,
+      2.3864989835540182
+    ]
+  },
+  "small_fallback": {
+    "raw_ms": {
+      "direct": [
+        0.372638,
+        0.300227,
+        0.311728,
+        0.43695,
+        0.584521,
+        0.450124,
+        0.282856,
+        0.038524,
+        0.036589,
+        0.398236,
+        0.266757,
+        0.269032,
+        0.042641,
+        0.276303,
+        0.04002,
+        0.04262,
+        0.277316,
+        0.365582,
+        0.039527,
+        0.267575,
+        0.042303,
+        0.037199,
+        0.033783,
+        0.034039,
+        0.040038,
+        0.077349,
+        0.69104,
+        0.039808,
+        0.042716,
+        0.04168,
+        0.034444
+      ],
+      "bounded": [
+        0.514954,
+        3.662331,
+        0.567796,
+        0.40519,
+        0.33611,
+        0.117569,
+        0.09194,
+        0.101789,
+        0.443141,
+        0.341287,
+        0.107867,
+        0.354802,
+        0.075883,
+        0.045676,
+        0.089158,
+        0.458093,
+        0.048057,
+        0.304073,
+        0.423267,
+        0.344645,
+        0.039869,
+        0.039662,
+        0.0408,
+        0.039635,
+        0.327983,
+        0.046981,
+        0.362487,
+        0.357837,
+        0.465714,
+        0.361571,
+        0.050231
+      ]
+    },
+    "order": [
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "direct",
+        "bounded"
+      ],
+      [
+        "bounded",
+        "direct"
+      ],
+      [
+        "bounded",
+        "direct"
+      ]
+    ],
+    "median_ms": {
+      "direct": 0.077349,
+      "bounded": 0.327983
+    },
+    "median_ratio": 0.235832344969099,
+    "median_elapsed_reduction_percent": -324.0300456373062,
+    "paired_bootstrap_ratio_95_interval": [
+      0.11937278705108749,
+      2.4806011106269756
+    ]
+  },
+  "filter_traced_peak_bytes": {
+    "direct": 11521488,
+    "bounded": 23249539
+  },
+  "memory_scope": "Python/NumPy traced allocations only; not process RSS. The bounded helper allocates a padded input, output and small block temporaries; no memory-saving claim."
+}

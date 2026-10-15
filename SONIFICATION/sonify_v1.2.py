@@ -6,14 +6,14 @@ import os
 def _smooth_dark_noise(noise):
     """Private width-60, zero-padded smoother for this prototype's noise.
 
-    Only bounded, contiguous float64 vectors of 8192..1440000 samples use
+    Only plain ndarray bounded, contiguous float64 vectors of 8192..1440000 samples use
     block-reset prefix sums. All other inputs retain NumPy's original path,
     including its short-input shape and nonfinite propagation. Within this
     bound the absolute error budget versus the direct FIR is 1e-9; equality
     of float64 values or arbitrary float32 renders is NOT promised. The
     fixed seed-2026 render has a separate exact PCM/WAV regression test.
     """
-    if (not isinstance(noise, np.ndarray) or noise.ndim != 1
+    if (type(noise) is not np.ndarray or noise.ndim != 1
             or noise.dtype != np.dtype(np.float64)
             or not noise.flags.c_contiguous
             or not 8192 <= noise.size <= 1_440_000

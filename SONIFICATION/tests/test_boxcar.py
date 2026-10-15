@@ -57,7 +57,9 @@ class BoxcarTests(unittest.TestCase):
     def test_outside_contract_is_exact_direct_fallback(self):
         rng = np.random.default_rng(2026)
         cases = [np.arange(n, dtype=float) for n in [1, 59, 60, 61, 8191]]
-        cases += [np.zeros(1_440_001), np.zeros(8192, dtype=np.float32),
+        masked = np.ma.array(np.ones(8192), mask=False)
+        masked.data[4000] = 1e20; masked.mask[4000] = True
+        cases += [masked, np.zeros(1_440_001), np.zeros(8192, dtype=np.float32),
                   np.zeros(8192, dtype=np.int64), np.zeros(8192, dtype=complex),
                   np.zeros(16384)[::2], [0.] * 8192,
                   np.full(8192, 1e12)+np.linspace(-1,1,8192),
