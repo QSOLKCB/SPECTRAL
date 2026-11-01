@@ -35,7 +35,7 @@
   function extractDecimalTokens(text, limit) {
     const max = Math.min(TOKEN_LIMIT, limit || TOKEN_LIMIT);
     const values = new Int32Array(max);
-    const pattern = /[+-]?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?/g;
+    const pattern = /[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g;
     let match, count = 0;
     while (count < max && (match = pattern.exec(String(text))) !== null) {
       try {
@@ -88,7 +88,7 @@
   function extractJsonNumerics(text, limit) {
     JSON.parse(text);
     const tokens = [], maximum = Math.min(TOKEN_LIMIT, limit || TOKEN_LIMIT);
-    const numberPattern = /-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?/y;
+    const numberPattern = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
     let inString = false;
     let escaped = false;
     for (let i = 0; i < text.length && tokens.length < maximum;) {
