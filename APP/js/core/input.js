@@ -185,7 +185,9 @@
       source.text = decodeUtf8(bytes).replace(/^\uFEFF/, "");
       source.numeric = extractStructuredNumerics(source.text, kind, file.name);
     } else if (kind === "binary") {
-      source.numeric = Int32Array.from(bytes.subarray(0, TOKEN_LIMIT), value => value * 1000000);
+      // The pre-read binary byte cap bounds expansion; keep all admitted bytes
+      // so existing qec_triality v2.0.0 source identities and tone plans replay.
+      source.numeric = Int32Array.from(bytes, value => value * 1000000);
     } else if (kind === "image") {
       source.image = await imagePixels(file, URL.createObjectURL(file));
       const luminance = new Int32Array(source.image.width * source.image.height);
