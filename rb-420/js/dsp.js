@@ -658,6 +658,31 @@
     return { left: left, right: right };
   }
 
+  async function decodeCompressedAudioBounded(file, bytes, context, probeDuration) {
+    // Duration metadata MUST be checked before the Web Audio decode. The
+    // compressed file size alone says nothing about expanded PCM allocation.
+    if (!file || !Number.isSafeInteger(file.size) ||
+        file.size < 1 || file.size > 12 * 1024 * 1024 ||
+        !bytes || !Number.isSafeInteger(bytes.byteLength) ||
+        bytes.byteLength < 1 || bytes.byteLength > 12 * 1024 * 1024) {
+      throw new RangeError('Compressed audio exceeds the input byte budget.');
+    }
+    if (typeof probeDuration !== 'function')
+      throw new TypeError('Audio metadata probe is required before decode.');
+    const seconds = await probeDuration(file);
+    if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 30) {
+      throw new RangeError('Compressed audio metadata exceeds the 30-second duration budget.');
+    }
+    if (!context || typeof context.decodeAudioData !== 'function')
+      throw new TypeError('Web Audio decoder is unavailable.');
+    const decoded = await context.decodeAudioData(bytes.slice(0));
+    assertImportPCM(decoded.length, decoded.sampleRate, decoded.numberOfChannels);
+    // A malicious or inconsistent media header must not be trusted after decode.
+    if (!Number.isFinite(decoded.duration) || decoded.duration > 30)
+      throw new RangeError('Decoded audio exceeds duration budget.');
+    return decoded;
+  }
+
   function assertProjectSampleBudget(samples, replacement, index, maxFrames) {
     if (!Array.isArray(samples) || samples.length > 16 ||
         !Number.isSafeInteger(maxFrames) || maxFrames < 1) {
@@ -744,6 +769,7 @@
     encodeWav: encodeWav,
     decodeWavPCM16: decodeWavPCM16,
     assertImportPCM: assertImportPCM,
+    decodeCompressedAudioBounded: decodeCompressedAudioBounded,
     assertProjectSampleBudget: assertProjectSampleBudget,
     floatToInt16: floatToInt16,
     audioBufferFromPCM: audioBufferFromPCM,
