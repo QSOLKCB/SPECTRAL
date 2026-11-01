@@ -145,3 +145,79 @@ test('QEC CSV export covers actual whitespace, tabs, CR and newline', () => {
   assert.match(cell('line1\nline2'),/,"line1\nline2",/);
   assert.match(cell('line1\rline2'),/,"line1\rline2",/);
 });
+
+test('RB-420 refuses tiny compressed 60-second audio BEFORE Web Audio decoding', async () => {
+  const DSP=loadDSP(), tiny=new Uint8Array(60*1024), file={name:'60s.mp3',size:tiny.length};
+  let decoded=0, probed=0;
+  const context={decodeAudioData(){decoded++; throw Error('must not decode rejected file');}};
+  await assert.rejects(
+    DSP.decodeCompressedAudioBounded(file,tiny.buffer,context,async()=>{probed++;return 60;}),
+    /30-second duration budget/
+  );
+  assert.equal(probed,1);
+  assert.equal(decoded,0);
+  for (const bad of [Infinity,NaN,0,-1]) {
+    await assert.rejects(
+      DSP.decodeCompressedAudioBounded(file,tiny.buffer,context,async()=>bad),
+      /duration budget/
+    );
+  }
+  assert.equal(decoded,0);
+  const output={length:44100,sampleRate:44100,numberOfChannels:2,duration:1};
+  const safe=await DSP.decodeCompressedAudioBounded(file,tiny.buffer,{
+    async decodeAudioData(){decoded++;return output;}
+  },async()=>1);
+  assert.equal(safe,output);
+  assert.equal(decoded,1);
+  const app=fs.readFileSync(path.join(root,'rb-420/app.js'),'utf8');
+  assert.match(app,/DSP\.decodeCompressedAudioBounded\(\s*file, bytes, engine\.context, probeCompressedDuration/);
+  assert.doesNotMatch(app,/engine\.context\.decodeAudioData\(bytes\.slice/);
+});
+
+test('QEC enforces column ceiling before copying rows or amplifying allocations',()=>{
+  const Q=loadQEC();
+  const head=Array.from({length:1000},(_,i)=>'unknown_'+i).join(',');
+  const row='0,'.repeat(999)+'0';
+  const hostile=head+'\n'+Array(250).fill(row).join('\n')+'\n';
+  assert.ok(Buffer.byteLength(hostile,'utf8')<2*1024*1024);
+  assert.throws(()=>Q.parseDataset(hostile,'columns.csv'),/column limit/);
+  assert.throws(()=>Q.parseDataset(
+    'cycle,qubit,error,syndrome\n0,0,X,1'+',x'.repeat(1000)+'\n','columns.csv'
+  ),/column limit/);
+  const valid=Q.parseDataset(
+    'cycle,qubit,error,syndrome,unknown,extra\n0,1,X,11,abc,def\n','valid.csv'
+  );
+  assert.equal(valid.length,1);
+  assert.equal(valid[0].qubit,1);
+  assert.equal(Object.hasOwn(valid[0],'unknown'),false);
+});
+
+test('QEC raw-byte identity is explicitly versioned; legacy BOM identity is not silently replayed',()=>{
+  const Q=loadQEC();
+  assert.equal(Q.VERSION,'1.1.0');
+  const sourceText='cycle,qubit,error,syndrome,correction,residual\n0,1,X,11,X,I\n';
+  const original=new TextEncoder().encode(sourceText);
+  const bytes=new Uint8Array(original.length+3);
+  bytes.set([0xef,0xbb,0xbf]);bytes.set(original,3);
+  const text=new TextDecoder('utf-8',{fatal:false}).decode(bytes);
+  const previousHash=Q.sha256Hex(new TextEncoder().encode(text));
+  const rawHash=Q.sha256Hex(bytes);
+  assert.notEqual(previousHash,rawHash);
+  const data={name:'bom.csv',rows:Q.parseDataset(text,'bom.csv'),byteHash:rawHash};
+  const rendered=Q.renderExperiment({code:'steane_7',cycles:2,duration:0.25},data);
+  assert.equal(rendered.recipe.source.byteHash,rawHash);
+  assert.equal(rendered.recipe.source.byteHashPolicy,'raw-selected-file-bytes/v1');
+  assert.equal(rendered.recipe.engineVersion,'1.1.0');
+  assert.equal(Q.replay(rendered.manifest,data).hashes.wav,rendered.hashes.wav);
+
+  const legacy=JSON.parse(JSON.stringify(rendered.manifest));
+  legacy.engineVersion='1.0.0';
+  legacy.recipe.engineVersion='1.0.0';
+  legacy.recipe.source.byteHash=previousHash;
+  delete legacy.recipe.source.byteHashPolicy;
+  const toHash=JSON.parse(JSON.stringify(legacy));
+  delete toHash.integrityHash;
+  legacy.integrityHash=Q.sha256Hex(Q.canonical(toHash));
+  assert.equal(Q.verifyManifest(legacy),true);
+  assert.throws(()=>Q.replay(legacy,data),/archived historical runtime/);
+});
