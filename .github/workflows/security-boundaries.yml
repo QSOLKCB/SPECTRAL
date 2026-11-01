@@ -1,0 +1,42 @@
+name: SPECTRAL security boundaries
+on:
+  push:
+    paths:
+      - 'APP/js/core/input.js'
+      - 'QEC/APP/**'
+      - 'PHOTOACOUSTIC/scripts/photoacoustic_sonifier.py'
+      - 'rb-420/**'
+      - 'security-tests/**'
+      - '.github/workflows/security-boundaries.yml'
+  pull_request:
+    paths:
+      - 'APP/js/core/input.js'
+      - 'QEC/APP/**'
+      - 'PHOTOACOUSTIC/scripts/photoacoustic_sonifier.py'
+      - 'rb-420/**'
+      - 'security-tests/**'
+      - '.github/workflows/security-boundaries.yml'
+permissions:
+  contents: read
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node --test security-tests/security-spectral.cjs
+      - run: node --check APP/js/core/input.js
+      - run: node --check QEC/APP/app.js
+      - run: node --check rb-420/app.js
+      - run: node --check rb-420/js/dsp.js
+  photoacoustic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install numpy scipy soundfile
+      - run: python -m unittest discover -s security-tests -p 'test_photoacoustic_security.py' -v
