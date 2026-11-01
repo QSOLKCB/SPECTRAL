@@ -57,7 +57,7 @@ test('QEC CSV neutralizes spreadsheet formulas, quoted CR, and leaves regular va
   const Q=loadQEC();
   const make=s=>Q.eventsCsv([{cycle:0,qubit:0,error:'X',syndrome:s,correction:'I',residual:'I'}]);
   for(const input of ['=1+1',' +2','\t@SUM(A1:A2)','\r=5','-3+4']){
-    assert.match(make(input),/,'/);
+    assert.match(make(input),/,\"?'/);
   }
   assert.match(make('a\r\nb'),/"a\r\nb"/);
   assert.match(make('011'),/,011,/);
