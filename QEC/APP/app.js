@@ -425,7 +425,7 @@
       seen.add(key);
       var syndromeText = String(r.syndrome);
       if (!new RegExp("^[0-" + (model.radix - 1) + "]+$").test(syndromeText)
-          || (syndromeText.length !== 1 && syndromeText.length !== model.checks.length))
+          || syndromeText.length > model.checks.length)
         throw new Error("Invalid syndrome digits or length for selected code.");
       if (syndromes.has(cycle) && syndromes.get(cycle) !== syndromeText)
         throw new Error("Conflicting syndromes in dataset cycle.");
