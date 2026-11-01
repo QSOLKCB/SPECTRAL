@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var VERSION = "1.0.0";
+  var VERSION = "1.1.0";
   var PROTOCOL = "spectral-qec-render-commit-reveal-v1";
   var SAMPLE_RATE = 44100;
 
@@ -351,6 +351,11 @@
     return { cycles: cycles, events: events, model: settings.code, radix: model.radix };
   }
 
+  var MAX_DATASET_COLUMNS = 32;
+  var DATASET_HEADERS = new Set([
+    "cycle", "round", "qubit", "site", "node", "error", "pauli",
+    "syndrome", "checks", "correction", "recovery", "residual", "post_error"
+  ]);
   function splitDelimited(line, delimiter) {
     var out = [], field = "", quoted = false;
     for (var i = 0; i < line.length; i++) {
@@ -358,7 +363,11 @@
       if (ch === '"') {
         if (quoted && line[i+1] === '"') { field += '"'; i++; }
         else quoted = !quoted;
-      } else if (ch === delimiter && !quoted) { out.push(field.trim()); field = ""; }
+      } else if (ch === delimiter && !quoted) {
+        if (out.length >= MAX_DATASET_COLUMNS - 1)
+          throw new Error("Dataset exceeds column limit.");
+        out.push(field.trim()); field = "";
+      }
       else field += ch;
     }
     out.push(field.trim());
@@ -386,10 +395,18 @@
       if (lines.length < 2) throw new Error("Dataset requires a header and at least one event row.");
       var delimiter = lines[0].indexOf("\t") >= 0 ? "\t" : ",";
       var headers = splitDelimited(lines[0], delimiter).map(function (h) { return h.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_"); });
+      // Only these fixed contract fields can affect a QEC dataset. Unknown
+      // headers are ignored, not copied into every row (quadratic amplification).
+      var recognized = headers.map(function (h, i) { return { name: h, index: i }; })
+        .filter(function (entry) { return DATASET_HEADERS.has(entry.name); });
+      if (!recognized.length) throw new Error("Dataset contains no recognized columns.");
+      if (new Set(headers).size !== headers.length) throw new Error("Duplicate dataset header.");
       if (lines.length - 1 > MAX_DATASET_ROWS) throw new Error("Dataset exceeds row limit.");
       rows = lines.slice(1).map(function (line) {
-        var fields = splitDelimited(line, delimiter), obj = {};
-        headers.forEach(function (h, i) { obj[h] = fields[i] == null ? "" : fields[i]; });
+        var fields = splitDelimited(line, delimiter), obj = Object.create(null);
+        recognized.forEach(function (entry) {
+          obj[entry.name] = fields[entry.index] == null ? "" : fields[entry.index];
+        });
         return obj;
       });
     }
@@ -568,7 +585,8 @@
   function renderExperiment(input, dataset) {
     var settings = normalizeSettings(clone(input));
     var source = dataset && dataset.rows ? {
-      kind: "local_dataset", name: dataset.name || "dataset", byteHash: dataset.byteHash, rows: dataset.rows.length
+      kind: "local_dataset", name: dataset.name || "dataset", byteHash: dataset.byteHash,
+      byteHashPolicy: "raw-selected-file-bytes/v1", rows: dataset.rows.length
     } : { kind: "generated_experiment", name: null, byteHash: null, rows: 0 };
     if (source.kind === "local_dataset" && !/^[0-9a-f]{64}$/.test(source.byteHash || ""))
       throw new Error("Local dataset requires its raw source SHA-256.");
@@ -616,9 +634,13 @@
   }
   function replay(manifest, dataset) {
     if (!verifyManifest(manifest)) throw new Error("Manifest authentication failed.");
+    if (manifest.engineVersion !== VERSION || manifest.recipe.engineVersion !== VERSION)
+      throw new Error("Manifest engine version requires its archived historical runtime for exact replay.");
     if (manifest.recipe.source.kind === "local_dataset") {
       if (!dataset || !dataset.rows || !/^[0-9a-f]{64}$/.test(dataset.byteHash || ""))
         throw new Error("Exact raw dataset bytes and SHA-256 are required for replay.");
+      if (manifest.recipe.source.byteHashPolicy !== "raw-selected-file-bytes/v1")
+        throw new Error("Legacy dataset identity requires its archived historical runtime.");
       var supplied = dataset.byteHash;
       if (supplied !== manifest.recipe.source.byteHash) throw new Error("Dataset identity mismatch.");
     }
