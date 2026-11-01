@@ -97,3 +97,51 @@ test('RB-420 caps decoded PCM before allocating Web Audio buffers',()=>{
   assert.match(app,/validateImportedProject\(data\)/);
   assert.match(app,/decodeImportedSamples\(data\.samples\)/);
 });
+
+test('Workbench binary boundary keeps every admitted byte and the v2 tone-plan source', async () => {
+  const {Input,TestFile}=loadInput();
+  const bytes=Uint8Array.from({length:300000},(_,i)=>i%256);
+  const file=new TestFile('source.bin',bytes.length);
+  file.arrayBuffer=async function(){this.reads++;return bytes.buffer.slice(0);};
+  const source=await Input.fromFile(file);
+  assert.equal(file.reads,1);
+  assert.equal(source.numeric.length,300000);
+  assert.equal(source.numeric[262144],0);
+  assert.equal(source.numeric[262145],1000000);
+  assert.equal(source.numeric[299999],223000000);
+  assert.equal(source.hash,'5576a58a474142a55f619be58eea2c14d7d7937cb99d5ef600a704fcde5ddbd8');
+  assert.equal(source.bytes.length,300000);
+  // Previously accepted sources must not change engine output under version 2.0.0.
+  const code=fs.readFileSync(path.join(root,'APP/js/engines/data.js'),'utf8');
+  assert.match(code,/id: "qec_triality"/);
+  assert.match(code,/version: "2\.0\.0"/);
+});
+
+test('RB-420 rejects aggregate overflow on admission, not after saving', () => {
+  const DSP=loadDSP();
+  const sample={pcmLeft:{length:705600},sampleRate:44100,frames:705600};
+  const samples=[sample,sample];
+  const old=Array.from(samples);
+  assert.equal(DSP.assertProjectSampleBudget(samples,null,-1,2000000),1411200);
+  assert.throws(
+    ()=>DSP.assertProjectSampleBudget(samples,sample,2,2000000),
+    /total frame budget/
+  );
+  assert.equal(samples.length,2);
+  assert.equal(samples[0],old[0]);
+  assert.equal(samples[1],old[1]);
+  // Replacement checks only the resulting total, not the previous duplicate.
+  assert.equal(DSP.assertProjectSampleBudget(samples,sample,1,2000000),1411200);
+  const code=fs.readFileSync(path.join(root,'rb-420/app.js'),'utf8');
+  assert.match(code,/assertProjectSampleBudget\(state\.samples, sample, index, MAX_PROJECT_SAMPLE_FRAMES\);[\s\S]*?state\.samples\[index\] = sample/);
+  assert.match(code,/function saveProject\(\)[\s\S]*?assertProjectSampleBudget\(state\.samples, null, -1, MAX_PROJECT_SAMPLE_FRAMES\)/);
+});
+
+test('QEC CSV export covers actual whitespace, tabs, CR and newline', () => {
+  const Q=loadQEC();
+  function cell(s){return Q.eventsCsv([{cycle:0,qubit:0,error:'X',syndrome:s,correction:'I',residual:'I'}]);}
+  assert.match(cell(' +2'),/,\x27 \+2,/);
+  assert.match(cell('\t=SUM(1)'),/,\x27\t=SUM\(1\),/);
+  assert.match(cell('line1\nline2'),/,"line1\nline2",/);
+  assert.match(cell('line1\rline2'),/,"line1\rline2",/);
+});
