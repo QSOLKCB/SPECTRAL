@@ -3,6 +3,20 @@
 
   const TEXT_EXTENSIONS = new Set(["csv", "json", "txt", "tsv", "log"]);
   const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "webp"]);
+  const TOKEN_LIMIT = 262144;
+  const MAX_TEXT_BYTES = 4 * 1024 * 1024;
+  const MAX_BINARY_BYTES = 2 * 1024 * 1024;
+  const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+  const MAX_IMAGE_DIMENSION = 4096;
+  const MAX_IMAGE_PIXELS = 4096 * 4096;
+
+  function fileLimit(kind) {
+    return kind === "image" ? MAX_IMAGE_BYTES : kind === "binary" ? MAX_BINARY_BYTES : MAX_TEXT_BYTES;
+  }
+  function checkSize(kind, bytes) {
+    if (!Number.isSafeInteger(bytes) || bytes < 0 || bytes > fileLimit(kind))
+      throw new RangeError("Local " + kind + " source exceeds the ingestion byte budget.");
+  }
 
   function extensionOf(name) {
     const parts = String(name || "").toLowerCase().split(".");
@@ -19,17 +33,15 @@
   }
 
   function extractDecimalTokens(text, limit) {
-    const tokens = String(text).match(/[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g) || [];
-    const values = new Int32Array(Math.min(tokens.length, limit || 262144));
-    let count = 0;
-    for (let i = 0; i < tokens.length && count < values.length; i += 1) {
+    const max = Math.min(TOKEN_LIMIT, limit || TOKEN_LIMIT);
+    const values = new Int32Array(max);
+    const pattern = /[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g;
+    let match, count = 0;
+    while (count < max && (match = pattern.exec(String(text))) !== null) {
       try {
-        const scaled = S.Core.decimalToScaled(tokens[i], 1000000);
-        values[count] = Math.max(-2147483648, Math.min(2147483647, scaled));
-        count += 1;
-      } catch (_) {
-        // Tokens outside the canonical fixed-point range are skipped explicitly.
-      }
+        const scaled = S.Core.decimalToScaled(match[0], 1000000);
+        values[count++] = Math.max(-2147483648, Math.min(2147483647, scaled));
+      } catch (_) { /* Out-of-range numbers are skipped. */ }
     }
     return values.slice(0, count);
   }
@@ -63,7 +75,8 @@
       } else if (character === '"' && field.length === 0) quoted = true;
       else if (character === delimiter || character === "\n" || character === "\r") {
         const token = field.trim();
-        if (/^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/.test(token)) fields.push(token);
+        if (/^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/.test(token)
+            && fields.length < Math.min(TOKEN_LIMIT, limit || TOKEN_LIMIT)) fields.push(token);
         field = "";
         if (character === "\r" && text[i + 1] === "\n") i += 1;
       } else field += character;
@@ -74,10 +87,11 @@
 
   function extractJsonNumerics(text, limit) {
     JSON.parse(text);
-    const tokens = [];
+    const tokens = [], maximum = Math.min(TOKEN_LIMIT, limit || TOKEN_LIMIT);
+    const numberPattern = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
     let inString = false;
     let escaped = false;
-    for (let i = 0; i < text.length;) {
+    for (let i = 0; i < text.length && tokens.length < maximum;) {
       const character = text[i];
       if (inString) {
         if (escaped) escaped = false;
@@ -88,7 +102,8 @@
       }
       if (character === '"') { inString = true; i += 1; continue; }
       if (character === "-" || (character >= "0" && character <= "9")) {
-        const match = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/.exec(text.slice(i));
+        numberPattern.lastIndex = i;
+        const match = numberPattern.exec(text);
         if (!match) throw new Error("Invalid JSON numeric token");
         tokens.push(match[0]);
         i += match[0].length;
@@ -117,6 +132,12 @@
       const image = new Image();
       image.onload = function onImageLoad() {
         try {
+          if (!image.naturalWidth || !image.naturalHeight
+              || image.naturalWidth > MAX_IMAGE_DIMENSION
+              || image.naturalHeight > MAX_IMAGE_DIMENSION
+              || image.naturalWidth * image.naturalHeight > MAX_IMAGE_PIXELS) {
+            throw new RangeError("Image dimensions exceed the local decode budget.");
+          }
           const maximum = 512;
           const scale = Math.min(1, maximum / Math.max(image.naturalWidth, image.naturalHeight));
           const width = Math.max(1, Math.round(image.naturalWidth * scale));
@@ -145,8 +166,10 @@
 
   async function fromFile(file) {
     if (!(file instanceof File)) throw new TypeError("Expected a local File");
-    const bytes = new Uint8Array(await file.arrayBuffer());
     const kind = classify(file.name);
+    checkSize(kind, file.size);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    checkSize(kind, bytes.length);
     const source = {
       name: file.name,
       type: file.type || "application/octet-stream",
@@ -162,6 +185,8 @@
       source.text = decodeUtf8(bytes).replace(/^\uFEFF/, "");
       source.numeric = extractStructuredNumerics(source.text, kind, file.name);
     } else if (kind === "binary") {
+      // The pre-read binary byte cap bounds expansion; keep all admitted bytes
+      // so existing qec_triality v2.0.0 source identities and tone plans replay.
       source.numeric = Int32Array.from(bytes, value => value * 1000000);
     } else if (kind === "image") {
       source.image = await imagePixels(file, URL.createObjectURL(file));
@@ -178,6 +203,7 @@
     const normalized = String(text);
     const bytes = S.Core.utf8(normalized);
     const kind = classify(name || "pasted.txt");
+    checkSize(kind, bytes.length);
     return {
       name: name || "pasted-source.txt",
       type: "text/plain;charset=utf-8",

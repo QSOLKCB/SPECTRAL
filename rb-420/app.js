@@ -5,6 +5,9 @@
   const DSP = RB420.DSP;
   const engine = new RB420.LiveEngine();
   const CHANNELS = 8;
+  const MAX_PROJECT_BYTES = 12 * 1024 * 1024;
+  const MAX_AUDIO_BYTES = 12 * 1024 * 1024;
+  const MAX_PROJECT_SAMPLE_FRAMES = 2000000;
   const DRUM_LANES = [
     ['kick', 'KICK', 'BD'],
     ['snare', 'SNARE', 'SD'],
@@ -1018,7 +1021,11 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'sample-slot' + (sample ? ' is-loaded' : '') + (i === selectedSample ? ' is-selected' : '');
-      button.innerHTML = '<strong>' + String(i + 1).padStart(2, '0') + '</strong><small>' + (sample ? sample.name : 'EMPTY') + '</small>';
+      const indexLabel = document.createElement('strong');
+      indexLabel.textContent = String(i + 1).padStart(2, '0');
+      const sampleName = document.createElement('small');
+      sampleName.textContent = sample ? sample.name : 'EMPTY';
+      button.append(indexLabel, sampleName);
       button.title = sample ? sample.name + ' · ' + sample.digest : 'Empty sample slot';
       button.addEventListener('click', () => { selectedSample = i; renderSampleSlots(); });
       container.appendChild(button);
@@ -1029,8 +1036,9 @@
   async function sendPCMToTracker(pcm, name) {
     if (!pcm) return;
     try {
+      DSP.assertImportPCM(pcm.left.length, pcm.sampleRate, 2);
       const sample = {
-        name: name || pcm.name || 'RB-420 Loop',
+        name: String(name || pcm.name || 'RB-420 Loop').slice(0, 128),
         pcmLeft: new Int16Array(pcm.left),
         pcmRight: new Int16Array(pcm.right || pcm.left),
         sampleRate: pcm.sampleRate,
@@ -1043,9 +1051,12 @@
       };
       let index = state.samples.findIndex(value => !value);
       if (index < 0) index = state.samples.length < 16 ? state.samples.length : selectedSample;
+      // Admit the combined session BEFORE mutation. Otherwise a session can
+      // be saved but rejected by the project's own reload budget.
+      DSP.assertProjectSampleBudget(state.samples, sample, index, MAX_PROJECT_SAMPLE_FRAMES);
+      await engine.installAudioBuffer(sample);
       state.samples[index] = sample;
       selectedSample = index;
-      await engine.installAudioBuffer(sample);
       const targetCell = state.tracker.pattern[0][0];
       Object.assign(targetCell, { note: 60, instrument: index + 1, volume: 64, effect: '---' });
       renderSampleSlots(); renderTracker();
@@ -1054,16 +1065,48 @@
     } catch (error) { toast(error.message, true); }
   }
 
+  function probeCompressedDuration(file) {
+    // Browser media metadata is probed without creating a decoded PCM buffer.
+    // Unknown, infinite, over-budget or timed-out duration fails closed.
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const element = document.createElement('audio');
+      let finished = false;
+      const timer = setTimeout(() => complete(new Error('Audio metadata timed out.')), 10000);
+      function complete(error, duration) {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        element.onloadedmetadata = null;
+        element.onerror = null;
+        element.removeAttribute('src');
+        try { element.load(); } catch (_) { /* Detached metadata element. */ }
+        URL.revokeObjectURL(url);
+        if (error) reject(error);
+        else resolve(duration);
+      }
+      element.preload = 'metadata';
+      element.onloadedmetadata = () => complete(null, element.duration);
+      element.onerror = () => complete(new Error('Cannot inspect compressed audio duration.'));
+      element.src = url;
+      element.load();
+    });
+  }
+
   async function importAudio(event) {
     const file = event.target.files[0];
     event.target.value = '';
     if (!file) return;
     try {
+      if (file.size > MAX_AUDIO_BYTES) throw new Error('Audio file exceeds compressed-byte budget.');
       const bytes = await file.arrayBuffer();
+      if (bytes.byteLength > MAX_AUDIO_BYTES) throw new Error('Audio file exceeds byte budget.');
       let pcm = DSP.decodeWavPCM16(bytes);
       if (!pcm) {
         await engine.ensureContext();
-        const audioBuffer = await engine.context.decodeAudioData(bytes.slice(0));
+        const audioBuffer = await DSP.decodeCompressedAudioBounded(
+          file, bytes, engine.context, probeCompressedDuration
+        );
         const converted = DSP.floatToInt16(audioBuffer.getChannelData(0), audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : null);
         pcm = { left: converted.left, right: converted.right, sampleRate: audioBuffer.sampleRate, frames: audioBuffer.length, duration: audioBuffer.duration, digest: DSP.hashInt16(converted.left, converted.right), mode: 'browser-decoded' };
       }
@@ -1190,7 +1233,13 @@
   }
 
   function base64ToInt16(text) {
+    if (typeof text !== 'string' || text.length > 4000000 ||
+        !/^[A-Za-z0-9+/]*={0,2}$/.test(text)) {
+      throw new Error('Invalid or oversized embedded sample encoding.');
+    }
     const binary = atob(text);
+    if (binary.length % 2 !== 0 || binary.length > 3000000)
+      throw new Error('Embedded PCM exceeds the sample limit.');
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
     return new Int16Array(bytes.buffer);
@@ -1215,6 +1264,8 @@
 
   function saveProject() {
     try {
+      // Fail visibly instead of writing a project the importer cannot reopen.
+      DSP.assertProjectSampleBudget(state.samples, null, -1, MAX_PROJECT_SAMPLE_FRAMES);
       const data = serializableProject(true);
       data.projectId = 'rb420-' + DSP.fnv1aString(DSP.stableStringify(serializableProject(false)));
       DSP.download(sanitizeFilename(state.meta.name) + '.rb420.json', JSON.stringify(data), 'application/json');
@@ -1222,25 +1273,83 @@
     } catch (error) { toast('Project save failed: ' + error.message, true); }
   }
 
+  function validateImportedProject(data) {
+    if (!data || data.schema !== 'rb420.project.v1' || !data.project ||
+        typeof data.project !== 'object' || Array.isArray(data.project)) {
+      throw new Error('Not an RB-420 project file.');
+    }
+    const p = data.project;
+    if (!Array.isArray(p.acid) || p.acid.length !== 2 ||
+        p.acid.some(m => !m || !Array.isArray(m.pattern) || m.pattern.length !== 16) ||
+        !p.drums || !p.drums.patterns ||
+        DRUM_LANES.some(lane => !Array.isArray(p.drums.patterns[lane[0]]) ||
+                               p.drums.patterns[lane[0]].length !== 16)) {
+      throw new Error('Project pattern dimensions exceed the supported schema.');
+    }
+    const tracker = p.tracker;
+    if (!tracker || ![32, 64].includes(tracker.rows) ||
+        !Array.isArray(tracker.pattern) || tracker.pattern.length !== tracker.rows ||
+        tracker.pattern.some(row => !Array.isArray(row) || row.length !== CHANNELS ||
+                              row.some(cell => !cell || typeof cell !== 'object' || Array.isArray(cell)))) {
+      throw new Error('Project tracker dimensions exceed supported limits.');
+    }
+    if (!Number.isFinite(p.tempo) || p.tempo < 40 || p.tempo > 250 ||
+        !p.meta || typeof p.meta.name !== 'string' || p.meta.name.length > 128 ||
+        typeof p.meta.author !== 'string' || typeof p.meta.notes !== 'string') {
+      throw new Error('Project metadata is invalid.');
+    }
+    if (data.samples !== undefined && (!Array.isArray(data.samples) || data.samples.length > 16))
+      throw new Error('Project exceeds 16 sample slots.');
+    return p;
+  }
+
+  function decodeImportedSamples(items) {
+    let totalFrames = 0;
+    return (items || []).map(item => {
+      if (!item || typeof item !== 'object' || Array.isArray(item) ||
+          typeof item.name !== 'string' || item.name.length > 128) {
+        throw new Error('Invalid imported sample name.');
+      }
+      if (!item.pcm16LeftBase64) return null;
+      // Reject based on encoded length before atob or Int16 allocations.
+      if (typeof item.pcm16LeftBase64 !== 'string' ||
+          item.pcm16LeftBase64.length > 4000000 ||
+          (item.pcm16RightBase64 && item.pcm16RightBase64.length > 4000000)) {
+        throw new Error('Embedded audio exceeds encoded-byte budget.');
+      }
+      const left = base64ToInt16(item.pcm16LeftBase64);
+      const right = item.pcm16RightBase64 ? base64ToInt16(item.pcm16RightBase64) : new Int16Array(left);
+      if (right.length !== left.length) throw new Error('Imported channels have different lengths.');
+      DSP.assertImportPCM(left.length, item.sampleRate, 2);
+      totalFrames += left.length;
+      if (totalFrames > MAX_PROJECT_SAMPLE_FRAMES) throw new Error('Project audio exceeds total frame budget.');
+      return Object.assign({}, item, {
+        pcmLeft: left, pcmRight: right, frames: left.length,
+        duration: left.length / item.sampleRate, audioBuffer: null
+      });
+    }).filter(Boolean);
+  }
+
   async function loadProject(event) {
     const file = event.target.files[0];
     event.target.value = '';
     if (!file) return;
     try {
-      const data = JSON.parse(await file.text());
-      if (data.schema !== 'rb420.project.v1' || !data.project) throw new Error('Not an RB-420 project file.');
+      if (file.size > MAX_PROJECT_BYTES) throw new Error('Project file exceeds byte budget.');
+      const text = await file.text();
+      if (new TextEncoder().encode(text).length > MAX_PROJECT_BYTES)
+        throw new Error('Project file exceeds byte budget.');
+      const data = JSON.parse(text);
+      const project = validateImportedProject(data);
+      const samples = decodeImportedSamples(data.samples);
+      // Build and validate everything before replacing the current session.
+      await engine.ensureContext();
+      for (const sample of samples) await engine.installAudioBuffer(sample);
       stopTransport();
-      const fresh = defaultState();
-      state = Object.assign(fresh, data.project);
-      state.samples = (data.samples || []).map(item => {
-        if (!item.pcm16LeftBase64) return null;
-        const left = base64ToInt16(item.pcm16LeftBase64);
-        const right = item.pcm16RightBase64 ? base64ToInt16(item.pcm16RightBase64) : new Int16Array(left);
-        return Object.assign({}, item, { pcmLeft: left, pcmRight: right, frames: left.length, duration: left.length / item.sampleRate, audioBuffer: null });
-      }).filter(Boolean);
+      state = Object.assign(defaultState(), project);
+      state.samples = samples;
       history = []; future = [];
       syncAllControls(); renderAll();
-      await prepareSampleBuffers();
       toast('Loaded ' + file.name + ' · ' + state.samples.length + ' sample(s)');
     } catch (error) { toast('Project load failed: ' + error.message, true); }
   }

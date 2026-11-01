@@ -587,6 +587,15 @@
     return buffer;
   }
 
+  function assertImportPCM(frames, rate, channels) {
+    if (!Number.isSafeInteger(frames) || frames < 1 || frames > 3000000 ||
+        !Number.isSafeInteger(rate) || rate < 8000 || rate > 192000 ||
+        frames > rate * 30 || !Number.isSafeInteger(channels) ||
+        channels < 1 || channels > 2) {
+      throw new RangeError('Imported audio exceeds sample-rate, duration or frame budget.');
+    }
+  }
+
   function decodeWavPCM16(arrayBuffer) {
     const view = new DataView(arrayBuffer);
     if (view.byteLength < 44) return null;
@@ -620,6 +629,7 @@
     }
     if (!format || dataOffset < 0 || format.audioFormat !== 1 || format.bits !== 16 || (format.channels !== 1 && format.channels !== 2)) return null;
     const frames = Math.floor(dataSize / (format.channels * 2));
+    assertImportPCM(frames, format.sampleRate, format.channels);
     const left = new Int16Array(frames);
     const right = new Int16Array(frames);
     let cursor = dataOffset;
@@ -634,6 +644,10 @@
 
   function floatToInt16(leftFloat, rightFloat) {
     const frames = leftFloat.length;
+    if (!Number.isSafeInteger(frames) || frames < 1 || frames > 3000000 ||
+        (rightFloat && rightFloat.length !== frames)) {
+      throw new RangeError('Imported decoded PCM exceeds frame budget.');
+    }
     const left = new Int16Array(frames);
     const right = new Int16Array(frames);
     for (let i = 0; i < frames; i += 1) {
@@ -644,10 +658,65 @@
     return { left: left, right: right };
   }
 
+  async function decodeCompressedAudioBounded(file, bytes, context, probeDuration) {
+    // Duration metadata MUST be checked before the Web Audio decode. The
+    // compressed file size alone says nothing about expanded PCM allocation.
+    if (!file || !Number.isSafeInteger(file.size) ||
+        file.size < 1 || file.size > 12 * 1024 * 1024 ||
+        !bytes || !Number.isSafeInteger(bytes.byteLength) ||
+        bytes.byteLength < 1 || bytes.byteLength > 12 * 1024 * 1024) {
+      throw new RangeError('Compressed audio exceeds the input byte budget.');
+    }
+    if (typeof probeDuration !== 'function')
+      throw new TypeError('Audio metadata probe is required before decode.');
+    const seconds = await probeDuration(file);
+    if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 30) {
+      throw new RangeError('Compressed audio metadata exceeds the 30-second duration budget.');
+    }
+    if (!context || typeof context.decodeAudioData !== 'function')
+      throw new TypeError('Web Audio decoder is unavailable.');
+    const decoded = await context.decodeAudioData(bytes.slice(0));
+    assertImportPCM(decoded.length, decoded.sampleRate, decoded.numberOfChannels);
+    // A malicious or inconsistent media header must not be trusted after decode.
+    if (!Number.isFinite(decoded.duration) || decoded.duration > 30)
+      throw new RangeError('Decoded audio exceeds duration budget.');
+    return decoded;
+  }
+
+  function assertProjectSampleBudget(samples, replacement, index, maxFrames) {
+    if (!Array.isArray(samples) || samples.length > 16 ||
+        !Number.isSafeInteger(maxFrames) || maxFrames < 1) {
+      throw new RangeError('Invalid project audio budget.');
+    }
+    if (replacement && (!Number.isSafeInteger(index) || index < 0 ||
+                        index > samples.length || index >= 16)) {
+      throw new RangeError('Invalid sample slot.');
+    }
+    let total = 0;
+    const count = samples.length + (replacement && index === samples.length ? 1 : 0);
+    for (let i = 0; i < count; i += 1) {
+      const sample = replacement && i === index ? replacement : samples[i];
+      if (!sample) continue;
+      const audio = sample.pcmLeft || sample.left;
+      if (!audio || !Number.isSafeInteger(audio.length) || audio.length < 1) {
+        throw new RangeError('Project sample lacks bounded PCM.');
+      }
+      total += audio.length;
+      if (total > maxFrames) {
+        throw new RangeError('Project audio exceeds total frame budget.');
+      }
+    }
+    return total;
+  }
+
   function audioBufferFromPCM(context, pcm) {
     const sourceLeft = pcm.left || pcm.pcmLeft;
     const sourceRight = pcm.right || pcm.pcmRight || sourceLeft;
-    if (!sourceLeft || !sourceLeft.length) throw new Error('PCM source has no samples.');
+    if (!sourceLeft || !sourceLeft.length || !sourceRight ||
+        sourceRight.length !== sourceLeft.length) {
+      throw new Error('PCM source has invalid channel data.');
+    }
+    assertImportPCM(sourceLeft.length, pcm.sampleRate, 2);
     const buffer = context.createBuffer(2, sourceLeft.length, pcm.sampleRate);
     const left = buffer.getChannelData(0);
     const right = buffer.getChannelData(1);
@@ -699,6 +768,9 @@
     renderSoundLab: renderSoundLab,
     encodeWav: encodeWav,
     decodeWavPCM16: decodeWavPCM16,
+    assertImportPCM: assertImportPCM,
+    decodeCompressedAudioBounded: decodeCompressedAudioBounded,
+    assertProjectSampleBudget: assertProjectSampleBudget,
     floatToInt16: floatToInt16,
     audioBufferFromPCM: audioBufferFromPCM,
     makeRecipe: makeRecipe,

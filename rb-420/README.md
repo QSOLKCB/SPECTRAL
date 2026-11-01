@@ -200,3 +200,8 @@ ReBirth and Reason are associated with Reason Studios. Roland, TB-303, TR-808, a
 ## Licence
 
 RB-420 is supplied under the MIT License. See `LICENSE.txt`.
+
+
+### Bounded compressed-audio imports
+
+Local encoded audio (including MP3) is checked for a **maximum 12 MiB compressed file size** and **30-second duration** before invoking `AudioContext.decodeAudioData`. Duration is obtained from a temporary, local `<audio preload="metadata">` element. Unknown, infinite, unavailable, timed-out, or over-limit metadata fails closed without allocating decoded Web Audio buffers. The decoded PCM frame/rate/channel limits remain enforced again after decoding. Browser metadata probing depends on the local browser's codec support; this is a bounded best-effort preflight, not a proof that arbitrary decoder implementations use fixed memory. PCM16 WAV imports retain the dedicated preallocation header/frame checks.
