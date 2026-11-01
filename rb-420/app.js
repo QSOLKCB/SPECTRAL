@@ -1051,9 +1051,12 @@
       };
       let index = state.samples.findIndex(value => !value);
       if (index < 0) index = state.samples.length < 16 ? state.samples.length : selectedSample;
+      // Admit the combined session BEFORE mutation. Otherwise a session can
+      // be saved but rejected by the project's own reload budget.
+      DSP.assertProjectSampleBudget(state.samples, sample, index, MAX_PROJECT_SAMPLE_FRAMES);
+      await engine.installAudioBuffer(sample);
       state.samples[index] = sample;
       selectedSample = index;
-      await engine.installAudioBuffer(sample);
       const targetCell = state.tracker.pattern[0][0];
       Object.assign(targetCell, { note: 60, instrument: index + 1, volume: 64, effect: '---' });
       renderSampleSlots(); renderTracker();
@@ -1232,6 +1235,8 @@
 
   function saveProject() {
     try {
+      // Fail visibly instead of writing a project the importer cannot reopen.
+      DSP.assertProjectSampleBudget(state.samples, null, -1, MAX_PROJECT_SAMPLE_FRAMES);
       const data = serializableProject(true);
       data.projectId = 'rb420-' + DSP.fnv1aString(DSP.stableStringify(serializableProject(false)));
       DSP.download(sanitizeFilename(state.meta.name) + '.rb420.json', JSON.stringify(data), 'application/json');
