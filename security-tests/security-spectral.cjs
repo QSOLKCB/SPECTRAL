@@ -225,7 +225,7 @@ test('QEC raw-byte identity is explicitly versioned; legacy BOM identity is not 
 test('QEC shipped engine badge matches runtime, recipe and manifest versions', () => {
   const Q = loadQEC();
   const html = fs.readFileSync(path.join(root, 'QEC/APP/index.html'), 'utf8');
-  const badge = html.match(/<span class="chip">ENGINE · (\\d+\\.\\d+\\.\\d+)<\\/span>/);
+  const badge = html.match(/<span class="chip">ENGINE · (\d+\.\d+\.\d+)<\/span>/);
   assert.ok(badge, 'Shipped QEC engine version badge must exist');
   const result = Q.renderExperiment({code: 'steane_7', cycles: 2, duration: 0.25});
   assert.equal(badge[1], Q.VERSION, 'Visible badge differs from engine runtime');
