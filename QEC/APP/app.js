@@ -657,7 +657,7 @@
   function eventsCsv(events) {
     var esc=function(v){
       var s=String(v);
-      if (/^[\x00-\x20]*[=+@-]/.test(s) || /^[\t\r]/.test(s)) s="'"+s;
+      if (typeof v === "string" && (/^[\x00-\x20]*[=+@-]/.test(s) || /^[\t\r]/.test(s))) s="'"+s;
       return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
     };
     return "cycle,qubit,error,syndrome,correction,residual\n"+events.map(function(e){return [e.cycle,e.qubit,e.error,e.syndrome,e.correction,e.residual].map(esc).join(",");}).join("\n")+"\n";
