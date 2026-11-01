@@ -1,4 +1,4 @@
-# SPECTRAL QEC Sonification Laboratory 1.0
+# SPECTRAL QEC Sonification Laboratory 1.1
 
 **A zero-install, browser-native laboratory for hearing deterministic quantum-error-correction models and event datasets.**
 
@@ -168,6 +168,13 @@ The manifest binds:
 - manifest integrity hash
 
 Manifest tampering fails authentication. Replaying a dataset-bound manifest requires the exact source identity.
+
+### Source identity and historical replay (engine v1.1.0)
+
+As of **engine 1.1.0**, the `recipe.source.byteHash` identifies the **raw selected file bytes**, with `recipe.source.byteHashPolicy = "raw-selected-file-bytes/v1"`. Earlier **1.0.0** manifests used the UTF-8 decoded/re-encoded text identity: a BOM or invalid UTF-8 sequence can therefore produce different historical and current source hashes. The two meanings are not interchangeable. To replay a v1.0.0 manifest exactly, use the archived v1.0.0 application and its original source. The current engine explicitly rejects mismatched historical engine versions rather than claiming an invalid replay.
+
+Imported local datasets are bounded to 2 MiB, 4,096 rows, 64 cycles (indices 0–63), and **32 delimited columns**, with only recognized QEC fields projected into event objects. Excess columns are rejected during tokenization, before materializing row objects. Binary WAV sample generation and scientific claim boundaries remain unchanged.
+
 
 ## Privacy and offline operation
 
