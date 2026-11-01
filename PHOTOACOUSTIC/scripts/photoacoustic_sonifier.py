@@ -577,8 +577,27 @@ def process_input_wav(
     laser_power: float,
     fx: List[str],
 ) -> np.ndarray:
-    """Load a WAV (or any audio), treat samples as light intensity modulation, run through PA."""
-    data, sr_in = sf.read(path, always_2d=False)
+    """Bound input metadata and projected resampling before any large allocation."""
+    if not isinstance(sr_out, int) or not 8000 <= sr_out <= 192000:
+        raise ValueError("Output sample rate must be within 8000..192000 Hz")
+    if Path(path).stat().st_size > 64 * 1024 * 1024:
+        raise ValueError("Input audio exceeds the compressed-byte budget")
+    info = sf.info(path)
+    sr_in = info.samplerate
+    if not isinstance(sr_in, int) or not 8000 <= sr_in <= 192000:
+        raise ValueError("Input audio sample rate is outside supported range")
+    if not isinstance(info.frames, int) or info.frames < 1 or info.frames > 5_000_000:
+        raise ValueError("Input audio frame count exceeds supported budget")
+    if not 1 <= info.channels <= 8:
+        raise ValueError("Input audio channel count exceeds supported budget")
+    if max(sr_out, sr_in) > min(sr_out, sr_in) * 8:
+        raise ValueError("Resampling ratio exceeds supported budget")
+    projected = (info.frames * sr_out + sr_in - 1) // sr_in
+    if projected > 3_000_000 or info.frames * info.channels * 8 > 80 * 1024 * 1024:
+        raise ValueError("Resampling frames or decoded memory exceed budget")
+    data, actual_rate = sf.read(path, always_2d=False)
+    if actual_rate != sr_in or data.shape[0] != info.frames:
+        raise ValueError("Audio metadata changed while reading")
     if data.ndim > 1:
         data = data.mean(axis=1)  # mono
     # Resample if needed
