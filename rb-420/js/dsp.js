@@ -658,6 +658,32 @@
     return { left: left, right: right };
   }
 
+  function assertProjectSampleBudget(samples, replacement, index, maxFrames) {
+    if (!Array.isArray(samples) || samples.length > 16 ||
+        !Number.isSafeInteger(maxFrames) || maxFrames < 1) {
+      throw new RangeError('Invalid project audio budget.');
+    }
+    if (replacement && (!Number.isSafeInteger(index) || index < 0 ||
+                        index > samples.length || index >= 16)) {
+      throw new RangeError('Invalid sample slot.');
+    }
+    let total = 0;
+    const count = samples.length + (replacement && index === samples.length ? 1 : 0);
+    for (let i = 0; i < count; i += 1) {
+      const sample = replacement && i === index ? replacement : samples[i];
+      if (!sample) continue;
+      const audio = sample.pcmLeft || sample.left;
+      if (!audio || !Number.isSafeInteger(audio.length) || audio.length < 1) {
+        throw new RangeError('Project sample lacks bounded PCM.');
+      }
+      total += audio.length;
+      if (total > maxFrames) {
+        throw new RangeError('Project audio exceeds total frame budget.');
+      }
+    }
+    return total;
+  }
+
   function audioBufferFromPCM(context, pcm) {
     const sourceLeft = pcm.left || pcm.pcmLeft;
     const sourceRight = pcm.right || pcm.pcmRight || sourceLeft;
@@ -718,6 +744,7 @@
     encodeWav: encodeWav,
     decodeWavPCM16: decodeWavPCM16,
     assertImportPCM: assertImportPCM,
+    assertProjectSampleBudget: assertProjectSampleBudget,
     floatToInt16: floatToInt16,
     audioBufferFromPCM: audioBufferFromPCM,
     makeRecipe: makeRecipe,
