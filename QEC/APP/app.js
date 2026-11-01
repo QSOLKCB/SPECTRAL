@@ -364,17 +364,29 @@
     out.push(field.trim());
     return out;
   }
+  var MAX_DATASET_BYTES = 2 * 1024 * 1024;
+  var MAX_DATASET_ROWS = 4096;
+  var MAX_DATASET_CYCLES = 64;
+  function validCycle(value) {
+    var n = Number(value);
+    if (!Number.isSafeInteger(n) || n < 0 || n >= MAX_DATASET_CYCLES)
+      throw new Error("Dataset cycle must be an integer in 0..63.");
+    return n;
+  }
   function parseDataset(text, filename) {
+    if (textBytes(text).length > MAX_DATASET_BYTES) throw new Error("Dataset exceeds byte limit.");
     var rows;
     if (/\.json$/i.test(filename || "") || String(text).trim()[0] === "[") {
       var parsed = JSON.parse(text);
       rows = Array.isArray(parsed) ? parsed : (parsed.events || parsed.rows);
       if (!Array.isArray(rows)) throw new Error("JSON must contain an array or an events array.");
+      if (rows.length > MAX_DATASET_ROWS) throw new Error("Dataset exceeds row limit.");
     } else {
       var lines = String(text).split(/\r?\n/).filter(function (line) { return line.trim(); });
       if (lines.length < 2) throw new Error("Dataset requires a header and at least one event row.");
       var delimiter = lines[0].indexOf("\t") >= 0 ? "\t" : ",";
       var headers = splitDelimited(lines[0], delimiter).map(function (h) { return h.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_"); });
+      if (lines.length - 1 > MAX_DATASET_ROWS) throw new Error("Dataset exceeds row limit.");
       rows = lines.slice(1).map(function (line) {
         var fields = splitDelimited(line, delimiter), obj = {};
         headers.forEach(function (h, i) { obj[h] = fields[i] == null ? "" : fields[i]; });
@@ -383,8 +395,12 @@
     }
     var normalized = rows.map(function (r, index) {
       return {
-        cycle: Math.max(0, int(r.cycle != null ? r.cycle : r.round, index)),
-        qubit: Math.max(-1, int(r.qubit != null ? r.qubit : (r.site != null ? r.site : r.node), -1)),
+        cycle: validCycle(r.cycle != null ? r.cycle : (r.round != null ? r.round : index)),
+        qubit: (function(v) {
+          var n = Number(v);
+          if (!Number.isSafeInteger(n) || n < -1 || n > 1024) throw new Error("Invalid dataset qubit index.");
+          return n;
+        })(r.qubit != null ? r.qubit : (r.site != null ? r.site : (r.node != null ? r.node : -1))),
         error: r.error != null ? r.error : (r.pauli != null ? r.pauli : "I"),
         syndrome: String(r.syndrome != null ? r.syndrome : (r.checks != null ? r.checks : "0")),
         correction: r.correction != null ? r.correction : (r.recovery != null ? r.recovery : "I"),
@@ -396,13 +412,36 @@
   }
 
   function datasetSimulation(settings, rows) {
-    var model = CODES[settings.code], maxCycle = rows.reduce(function (m, r) { return Math.max(m, r.cycle); }, 0);
-    var totalCycles = Math.max(settings.cycles, maxCycle + 1), cycles = [], events = [];
+    var model = CODES[settings.code], grouped = Array.from({ length: MAX_DATASET_CYCLES }, function(){return [];});
+    if (!Array.isArray(rows) || !rows.length || rows.length > MAX_DATASET_ROWS)
+      throw new Error("Dataset requires 1.." + MAX_DATASET_ROWS + " rows.");
+    var seen = new Set(), syndromes = new Map(), maxCycle = 0;
+    rows.forEach(function(r) {
+      var cycle = validCycle(r.cycle), q = Number(r.qubit);
+      if (!Number.isSafeInteger(q) || q < -1 || q >= model.n)
+        throw new Error("Dataset qubit is outside the selected code.");
+      var key = cycle + ":" + q;
+      if (seen.has(key)) throw new Error("Duplicate dataset cycle/qubit row.");
+      seen.add(key);
+      var syndromeText = String(r.syndrome);
+      if (!new RegExp("^[0-" + (model.radix - 1) + "]+$").test(syndromeText)
+          || (syndromeText.length !== 1 && syndromeText.length !== model.checks.length))
+        throw new Error("Invalid syndrome digits or length for selected code.");
+      if (syndromes.has(cycle) && syndromes.get(cycle) !== syndromeText)
+        throw new Error("Conflicting syndromes in dataset cycle.");
+      syndromes.set(cycle, syndromeText);
+      grouped[cycle].push(r);
+      maxCycle = Math.max(maxCycle, cycle);
+    });
+    var totalCycles = Math.max(settings.cycles, maxCycle + 1);
+    if (!Number.isSafeInteger(totalCycles) || totalCycles > MAX_DATASET_CYCLES)
+      throw new Error("Dataset exceeds cycle budget.");
+    var cycles = [], events = [];
     for (var c = 0; c < totalCycles; c++) {
       var errors = new Array(model.n).fill(0), correction = new Array(model.n).fill(0), residual = new Array(model.n).fill(0);
-      var group = rows.filter(function (r) { return r.cycle === c; });
-      group.forEach(function (r) {
-        if (r.qubit >= 0 && r.qubit < model.n) {
+      var group = grouped[c];
+      group.forEach(function(r) {
+        if (r.qubit >= 0) {
           errors[r.qubit] = pauliValue(r.error, model.radix);
           correction[r.qubit] = pauliValue(r.correction, model.radix);
           residual[r.qubit] = pauliValue(r.residual, model.radix);
@@ -413,10 +452,9 @@
           residual: pauliName(pauliValue(r.residual, model.radix), model.radix)
         });
       });
-      var syn = group.length ? String(group[0].syndrome).split("").map(function (x) { return int(x, 0); }) : syndrome(errors, model);
+      var syn = group.length ? String(group[0].syndrome).split("").map(Number) : syndrome(errors, model);
       cycles.push({ cycle:c, errors:errors, syndrome:syn, correction:correction, residual:residual, residualSyndrome:syndrome(residual,model), iterations:0 });
     }
-    if (!events.length) throw new Error("Dataset contains no usable event rows.");
     return { cycles: cycles, events: events, model: settings.code, radix: model.radix };
   }
 
@@ -530,8 +568,10 @@
   function renderExperiment(input, dataset) {
     var settings = normalizeSettings(clone(input));
     var source = dataset && dataset.rows ? {
-      kind: "local_dataset", name: dataset.name || "dataset", byteHash: dataset.byteHash || sha256Hex(canonical(dataset.rows)), rows: dataset.rows.length
+      kind: "local_dataset", name: dataset.name || "dataset", byteHash: dataset.byteHash, rows: dataset.rows.length
     } : { kind: "generated_experiment", name: null, byteHash: null, rows: 0 };
+    if (source.kind === "local_dataset" && !/^[0-9a-f]{64}$/.test(source.byteHash || ""))
+      throw new Error("Local dataset requires its raw source SHA-256.");
     var sim = source.kind === "local_dataset" ? datasetSimulation(settings, dataset.rows) : simulate(settings);
     var pcm = synthesize(settings, sim), wav = wavBytes(pcm, settings.sampleRate), summary = summarize(sim);
     var recipe = {
@@ -577,8 +617,9 @@
   function replay(manifest, dataset) {
     if (!verifyManifest(manifest)) throw new Error("Manifest authentication failed.");
     if (manifest.recipe.source.kind === "local_dataset") {
-      if (!dataset || !dataset.rows) throw new Error("Exact local dataset is required for replay.");
-      var supplied = dataset.byteHash || sha256Hex(canonical(dataset.rows));
+      if (!dataset || !dataset.rows || !/^[0-9a-f]{64}$/.test(dataset.byteHash || ""))
+        throw new Error("Exact raw dataset bytes and SHA-256 are required for replay.");
+      var supplied = dataset.byteHash;
       if (supplied !== manifest.recipe.source.byteHash) throw new Error("Dataset identity mismatch.");
     }
     var rerender = renderExperiment(manifest.recipe.settings, dataset);
@@ -614,14 +655,18 @@
     return concatBytes(locals.concat([central,end]));
   }
   function eventsCsv(events) {
-    var esc=function(v){var s=String(v);return /[\",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+    var esc=function(v){
+      var s=String(v);
+      if (/^[\\x00-\\x20]*[=+@-]/.test(s) || /^[\\t\\r]/.test(s)) s="'"+s;
+      return /[",\\n\\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+    };
     return "cycle,qubit,error,syndrome,correction,residual\n"+events.map(function(e){return [e.cycle,e.qubit,e.error,e.syndrome,e.correction,e.residual].map(esc).join(",");}).join("\n")+"\n";
   }
 
   var API = {
     VERSION:VERSION, PROTOCOL:PROTOCOL, STATES:STATES, CODES:CODES, NOISE:NOISE, DECODERS:DECODERS,
     canonical:canonical, sha256Hex:sha256Hex, normalizeSettings:normalizeSettings, syndrome:syndrome,
-    simulate:simulate, parseDataset:parseDataset, renderExperiment:renderExperiment, verifyManifest:verifyManifest,
+    simulate:simulate, parseDataset:parseDataset, datasetSimulation:datasetSimulation, renderExperiment:renderExperiment, verifyManifest:verifyManifest,
     replay:replay, wavBytes:wavBytes, eventsCsv:eventsCsv, zipStore:zipStore, textBytes:textBytes
   };
   window.QECLab = API;
@@ -721,8 +766,11 @@
 
   function handleFile(file){
     if(!file)return;
-    file.text().then(function(text){
-      var rows=parseDataset(text,file.name),bytes=textBytes(text);
+    if (file.size > MAX_DATASET_BYTES) { toast("Dataset exceeds byte limit.",true); return; }
+    file.arrayBuffer().then(function(buffer){
+      if (buffer.byteLength > MAX_DATASET_BYTES) throw new Error("Dataset exceeds byte limit.");
+      var bytes=new Uint8Array(buffer), text=new TextDecoder("utf-8",{fatal:false}).decode(bytes);
+      var rows=parseDataset(text,file.name);
       dataset={name:file.name,rows:rows,byteHash:sha256Hex(bytes)};
       $("source-status").innerHTML="<span></span><small></small>";
       $("source-status").firstElementChild.textContent=file.name;
