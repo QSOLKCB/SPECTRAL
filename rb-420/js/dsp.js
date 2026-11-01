@@ -587,6 +587,15 @@
     return buffer;
   }
 
+  function assertImportPCM(frames, rate, channels) {
+    if (!Number.isSafeInteger(frames) || frames < 1 || frames > 3000000 ||
+        !Number.isSafeInteger(rate) || rate < 8000 || rate > 192000 ||
+        frames > rate * 30 || !Number.isSafeInteger(channels) ||
+        channels < 1 || channels > 2) {
+      throw new RangeError('Imported audio exceeds sample-rate, duration or frame budget.');
+    }
+  }
+
   function decodeWavPCM16(arrayBuffer) {
     const view = new DataView(arrayBuffer);
     if (view.byteLength < 44) return null;
@@ -620,6 +629,7 @@
     }
     if (!format || dataOffset < 0 || format.audioFormat !== 1 || format.bits !== 16 || (format.channels !== 1 && format.channels !== 2)) return null;
     const frames = Math.floor(dataSize / (format.channels * 2));
+    assertImportPCM(frames, format.sampleRate, format.channels);
     const left = new Int16Array(frames);
     const right = new Int16Array(frames);
     let cursor = dataOffset;
@@ -634,6 +644,10 @@
 
   function floatToInt16(leftFloat, rightFloat) {
     const frames = leftFloat.length;
+    if (!Number.isSafeInteger(frames) || frames < 1 || frames > 3000000 ||
+        (rightFloat && rightFloat.length !== frames)) {
+      throw new RangeError('Imported decoded PCM exceeds frame budget.');
+    }
     const left = new Int16Array(frames);
     const right = new Int16Array(frames);
     for (let i = 0; i < frames; i += 1) {
@@ -647,7 +661,11 @@
   function audioBufferFromPCM(context, pcm) {
     const sourceLeft = pcm.left || pcm.pcmLeft;
     const sourceRight = pcm.right || pcm.pcmRight || sourceLeft;
-    if (!sourceLeft || !sourceLeft.length) throw new Error('PCM source has no samples.');
+    if (!sourceLeft || !sourceLeft.length || !sourceRight ||
+        sourceRight.length !== sourceLeft.length) {
+      throw new Error('PCM source has invalid channel data.');
+    }
+    assertImportPCM(sourceLeft.length, pcm.sampleRate, 2);
     const buffer = context.createBuffer(2, sourceLeft.length, pcm.sampleRate);
     const left = buffer.getChannelData(0);
     const right = buffer.getChannelData(1);
@@ -699,6 +717,7 @@
     renderSoundLab: renderSoundLab,
     encodeWav: encodeWav,
     decodeWavPCM16: decodeWavPCM16,
+    assertImportPCM: assertImportPCM,
     floatToInt16: floatToInt16,
     audioBufferFromPCM: audioBufferFromPCM,
     makeRecipe: makeRecipe,
