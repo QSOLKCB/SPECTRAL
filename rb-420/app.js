@@ -1065,6 +1065,34 @@
     } catch (error) { toast(error.message, true); }
   }
 
+  function probeCompressedDuration(file) {
+    // Browser media metadata is probed without creating a decoded PCM buffer.
+    // Unknown, infinite, over-budget or timed-out duration fails closed.
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const element = document.createElement('audio');
+      let finished = false;
+      const timer = setTimeout(() => complete(new Error('Audio metadata timed out.')), 10000);
+      function complete(error, duration) {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        element.onloadedmetadata = null;
+        element.onerror = null;
+        element.removeAttribute('src');
+        try { element.load(); } catch (_) { /* Detached metadata element. */ }
+        URL.revokeObjectURL(url);
+        if (error) reject(error);
+        else resolve(duration);
+      }
+      element.preload = 'metadata';
+      element.onloadedmetadata = () => complete(null, element.duration);
+      element.onerror = () => complete(new Error('Cannot inspect compressed audio duration.'));
+      element.src = url;
+      element.load();
+    });
+  }
+
   async function importAudio(event) {
     const file = event.target.files[0];
     event.target.value = '';
@@ -1076,8 +1104,9 @@
       let pcm = DSP.decodeWavPCM16(bytes);
       if (!pcm) {
         await engine.ensureContext();
-        const audioBuffer = await engine.context.decodeAudioData(bytes.slice(0));
-        DSP.assertImportPCM(audioBuffer.length, audioBuffer.sampleRate, audioBuffer.numberOfChannels);
+        const audioBuffer = await DSP.decodeCompressedAudioBounded(
+          file, bytes, engine.context, probeCompressedDuration
+        );
         const converted = DSP.floatToInt16(audioBuffer.getChannelData(0), audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : null);
         pcm = { left: converted.left, right: converted.right, sampleRate: audioBuffer.sampleRate, frames: audioBuffer.length, duration: audioBuffer.duration, digest: DSP.hashInt16(converted.left, converted.right), mode: 'browser-decoded' };
       }
