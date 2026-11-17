@@ -123,6 +123,8 @@ Example:
     1,-1,I,00,I,I
     2,0,Z,101000,Z,I
 
+`qubit = -1` is an identity-only placeholder for a cycle with no site event; its error, correction, and residual must all normalize to the identity operation.
+
 Dataset contents are not displayed before the render finishes. The pre-render source panel exposes only the local filename, normalized row count, and byte hash.
 
 ## Determinism modes
