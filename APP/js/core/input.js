@@ -9,13 +9,31 @@
   const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
   const MAX_IMAGE_DIMENSION = 4096;
   const MAX_IMAGE_PIXELS = 4096 * 4096;
+  const MAX_MANIFEST_BYTES = 4 * 1024 * 1024;
+  const MAX_DERIVATIVE_BYTES = 16 * 1024 * 1024;
+  const LIMITS = Object.freeze({
+    textBytes: MAX_TEXT_BYTES,
+    binaryBytes: MAX_BINARY_BYTES,
+    imageBytes: MAX_IMAGE_BYTES,
+    manifestBytes: MAX_MANIFEST_BYTES,
+    derivativeBytes: MAX_DERIVATIVE_BYTES,
+    imageDimension: MAX_IMAGE_DIMENSION,
+    imagePixels: MAX_IMAGE_PIXELS
+  });
 
   function fileLimit(kind) {
     return kind === "image" ? MAX_IMAGE_BYTES : kind === "binary" ? MAX_BINARY_BYTES : MAX_TEXT_BYTES;
   }
-  function checkSize(kind, bytes) {
-    if (!Number.isSafeInteger(bytes) || bytes < 0 || bytes > fileLimit(kind))
-      throw new RangeError("Local " + kind + " source exceeds the ingestion byte budget.");
+  function checkSize(label, bytes, maximum) {
+    if (!Number.isSafeInteger(bytes) || bytes < 0 || bytes > maximum)
+      throw new RangeError("Local " + label + " exceeds the ingestion byte budget.");
+  }
+  async function readBoundedBytes(file, maximum, label) {
+    if (!(file instanceof File)) throw new TypeError("Expected a local File");
+    checkSize(label, file.size, maximum);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    checkSize(label, bytes.length, maximum);
+    return bytes;
   }
 
   function extensionOf(name) {
@@ -127,16 +145,132 @@
     return decodeURIComponent(escape(binary));
   }
 
-  function imagePixels(file, objectUrl) {
+  function bytesMatch(bytes, offset, expected) {
+    if (offset < 0 || offset + expected.length > bytes.length) return false;
+    for (let i = 0; i < expected.length; i += 1) {
+      if (bytes[offset + i] !== expected[i]) return false;
+    }
+    return true;
+  }
+
+  function uint16BigEndian(bytes, offset) {
+    if (offset < 0 || offset + 2 > bytes.length) throw new Error("Truncated image header.");
+    return bytes[offset] * 256 + bytes[offset + 1];
+  }
+
+  function uint32BigEndian(bytes, offset) {
+    if (offset < 0 || offset + 4 > bytes.length) throw new Error("Truncated image header.");
+    return bytes[offset] * 0x1000000 + bytes[offset + 1] * 0x10000 + bytes[offset + 2] * 0x100 + bytes[offset + 3];
+  }
+
+  function uint32LittleEndian(bytes, offset) {
+    if (offset < 0 || offset + 4 > bytes.length) throw new Error("Truncated image header.");
+    return bytes[offset] + bytes[offset + 1] * 0x100 + bytes[offset + 2] * 0x10000 + bytes[offset + 3] * 0x1000000;
+  }
+
+  function inspectPngDimensions(bytes) {
+    const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+    if (!bytesMatch(bytes, 0, signature) || bytes.length < 29
+        || uint32BigEndian(bytes, 8) !== 13 || !bytesMatch(bytes, 12, [73, 72, 68, 82])) {
+      throw new Error("Invalid PNG header.");
+    }
+    return { width: uint32BigEndian(bytes, 16), height: uint32BigEndian(bytes, 20) };
+  }
+
+  function inspectJpegDimensions(bytes) {
+    if (!bytesMatch(bytes, 0, [255, 216])) throw new Error("Invalid JPEG header.");
+    const startOfFrame = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf]);
+    let offset = 2;
+    while (offset < bytes.length) {
+      if (bytes[offset] !== 0xff) throw new Error("Invalid JPEG marker sequence.");
+      while (offset < bytes.length && bytes[offset] === 0xff) offset += 1;
+      if (offset >= bytes.length) break;
+      const marker = bytes[offset++];
+      if (marker === 0x00) throw new Error("Invalid JPEG marker sequence.");
+      if (marker === 0x01 || marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd7)) continue;
+      if (marker === 0xd9 || marker === 0xda) break;
+      const length = uint16BigEndian(bytes, offset);
+      if (length < 2 || offset + length > bytes.length) throw new Error("Truncated JPEG segment.");
+      if (startOfFrame.has(marker)) {
+        if (length < 8 || !bytes[offset + 7] || length !== 8 + bytes[offset + 7] * 3) {
+          throw new Error("Invalid JPEG frame header.");
+        }
+        return { width: uint16BigEndian(bytes, offset + 5), height: uint16BigEndian(bytes, offset + 3) };
+      }
+      offset += length;
+    }
+    throw new Error("JPEG dimensions are missing.");
+  }
+
+  function inspectWebpDimensions(bytes) {
+    if (!bytesMatch(bytes, 0, [82, 73, 70, 70]) || !bytesMatch(bytes, 8, [87, 69, 66, 80])) {
+      throw new Error("Invalid WebP header.");
+    }
+    const containerEnd = uint32LittleEndian(bytes, 4) + 8;
+    if (containerEnd < 12 || containerEnd > bytes.length) throw new Error("Truncated WebP container.");
+    let offset = 12;
+    while (offset + 8 <= containerEnd) {
+      const chunkSize = uint32LittleEndian(bytes, offset + 4);
+      const data = offset + 8;
+      const chunkEnd = data + chunkSize;
+      if (!Number.isSafeInteger(chunkEnd) || chunkEnd > containerEnd) throw new Error("Truncated WebP chunk.");
+      if (bytesMatch(bytes, offset, [86, 80, 56, 88])) {
+        if (chunkSize < 10) throw new Error("Invalid WebP extended header.");
+        return {
+          width: 1 + bytes[data + 4] + bytes[data + 5] * 0x100 + bytes[data + 6] * 0x10000,
+          height: 1 + bytes[data + 7] + bytes[data + 8] * 0x100 + bytes[data + 9] * 0x10000
+        };
+      }
+      if (bytesMatch(bytes, offset, [86, 80, 56, 76])) {
+        if (chunkSize < 5 || bytes[data] !== 0x2f) throw new Error("Invalid lossless WebP header.");
+        return {
+          width: 1 + bytes[data + 1] + (bytes[data + 2] & 0x3f) * 0x100,
+          height: 1 + ((bytes[data + 2] & 0xc0) >>> 6) + bytes[data + 3] * 4 + (bytes[data + 4] & 0x0f) * 0x400
+        };
+      }
+      if (bytesMatch(bytes, offset, [86, 80, 56, 32])) {
+        if (chunkSize < 10 || !bytesMatch(bytes, data + 3, [157, 1, 42])) throw new Error("Invalid lossy WebP header.");
+        return {
+          width: (bytes[data + 6] + bytes[data + 7] * 0x100) & 0x3fff,
+          height: (bytes[data + 8] + bytes[data + 9] * 0x100) & 0x3fff
+        };
+      }
+      offset = chunkEnd + (chunkSize & 1);
+    }
+    throw new Error("WebP dimensions are missing.");
+  }
+
+  function inspectImageDimensions(bytes) {
+    let dimensions;
+    if (bytesMatch(bytes, 0, [137, 80, 78, 71, 13, 10, 26, 10])) dimensions = inspectPngDimensions(bytes);
+    else if (bytesMatch(bytes, 0, [255, 216])) dimensions = inspectJpegDimensions(bytes);
+    else if (bytesMatch(bytes, 0, [82, 73, 70, 70])) dimensions = inspectWebpDimensions(bytes);
+    else throw new Error("Unsupported or invalid local image header.");
+    if (!dimensions.width || !dimensions.height
+        || dimensions.width > MAX_IMAGE_DIMENSION
+        || dimensions.height > MAX_IMAGE_DIMENSION
+        || dimensions.width * dimensions.height > MAX_IMAGE_PIXELS) {
+      throw new RangeError("Image dimensions exceed the local decode budget.");
+    }
+    return dimensions;
+  }
+
+  function decodedDimensionsMatch(width, height, expectedDimensions) {
+    const exact = width === expectedDimensions.width && height === expectedDimensions.height;
+    // Browsers can apply EXIF orientation before exposing natural dimensions.
+    // A 90/270-degree rotation only transposes the two validated axes, leaving
+    // both the maximum dimension and total pixel count within the same budget.
+    const transposed = width === expectedDimensions.height && height === expectedDimensions.width;
+    return exact || transposed;
+  }
+
+  function imagePixels(objectUrl, expectedDimensions) {
     return new Promise((resolve, reject) => {
       const image = new Image();
       image.onload = function onImageLoad() {
         try {
-          if (!image.naturalWidth || !image.naturalHeight
-              || image.naturalWidth > MAX_IMAGE_DIMENSION
-              || image.naturalHeight > MAX_IMAGE_DIMENSION
-              || image.naturalWidth * image.naturalHeight > MAX_IMAGE_PIXELS) {
-            throw new RangeError("Image dimensions exceed the local decode budget.");
+          if (!decodedDimensionsMatch(image.naturalWidth, image.naturalHeight, expectedDimensions)) {
+            throw new Error("Decoded image dimensions do not match its validated header.");
           }
           const maximum = 512;
           const scale = Math.min(1, maximum / Math.max(image.naturalWidth, image.naturalHeight));
@@ -167,9 +301,8 @@
   async function fromFile(file) {
     if (!(file instanceof File)) throw new TypeError("Expected a local File");
     const kind = classify(file.name);
-    checkSize(kind, file.size);
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    checkSize(kind, bytes.length);
+    const bytes = await readBoundedBytes(file, fileLimit(kind), kind + " source");
+    const imageDimensions = kind === "image" ? inspectImageDimensions(bytes) : null;
     const source = {
       name: file.name,
       type: file.type || "application/octet-stream",
@@ -189,7 +322,7 @@
       // so existing qec_triality v2.0.0 source identities and tone plans replay.
       source.numeric = Int32Array.from(bytes, value => value * 1000000);
     } else if (kind === "image") {
-      source.image = await imagePixels(file, URL.createObjectURL(file));
+      source.image = await imagePixels(URL.createObjectURL(file), imageDimensions);
       const luminance = new Int32Array(source.image.width * source.image.height);
       for (let i = 0, p = 0; i < source.image.pixels.length; i += 4, p += 1) {
         luminance[p] = (source.image.pixels[i] * 2126 + source.image.pixels[i + 1] * 7152 + source.image.pixels[i + 2] * 722) * 100;
@@ -201,9 +334,10 @@
 
   function fromText(text, name) {
     const normalized = String(text);
-    const bytes = S.Core.utf8(normalized);
     const kind = classify(name || "pasted.txt");
-    checkSize(kind, bytes.length);
+    checkSize(kind + " source text", normalized.length, fileLimit(kind));
+    const bytes = S.Core.utf8(normalized);
+    checkSize(kind + " source", bytes.length, fileLimit(kind));
     return {
       name: name || "pasted-source.txt",
       type: "text/plain;charset=utf-8",
@@ -234,5 +368,27 @@
     };
   }
 
-  S.Core.Input = Object.freeze({ classify, extractDecimalTokens, extractTabularNumerics, extractJsonNumerics, fromFile, fromText, descriptor });
+  async function readManifestText(file) {
+    const bytes = await readBoundedBytes(file, MAX_MANIFEST_BYTES, "manifest");
+    return decodeUtf8(bytes).replace(/^\uFEFF/, "");
+  }
+
+  function readDerivativeBytes(file) {
+    return readBoundedBytes(file, MAX_DERIVATIVE_BYTES, "derivative audio");
+  }
+
+  S.Core.Input = Object.freeze({
+    limits: LIMITS,
+    classify,
+    extractDecimalTokens,
+    extractTabularNumerics,
+    extractJsonNumerics,
+    inspectImageDimensions,
+    decodedDimensionsMatch,
+    fromFile,
+    fromText,
+    readManifestText,
+    readDerivativeBytes,
+    descriptor
+  });
 })(window.SPECTRAL);

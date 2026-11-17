@@ -83,6 +83,13 @@ test('Workbench enforces pre-read limits and stops numeric tokenization',async()
   assert.equal(Input.extractDecimalTokens('1 '.repeat(270000)).length,262144);
   assert.throws(()=>Input.fromText('x'.repeat(4*1024*1024+1),'big.txt'),/byte budget/);
 });
+test('Workbench permits only budget-equivalent EXIF dimension transposes',()=>{
+  const {Input}=loadInput(), encoded={width:640,height:480};
+  assert.equal(Input.decodedDimensionsMatch(640,480,encoded),true);
+  assert.equal(Input.decodedDimensionsMatch(480,640,encoded),true);
+  assert.equal(Input.decodedDimensionsMatch(641,480,encoded),false);
+  assert.equal(Input.decodedDimensionsMatch(480,639,encoded),false);
+});
 test('RB-420 caps decoded PCM before allocating Web Audio buffers',()=>{
   const DSP=loadDSP();
   assert.throws(()=>DSP.assertImportPCM(3000001,44100,2),/budget/);
