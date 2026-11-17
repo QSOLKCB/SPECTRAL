@@ -255,12 +255,21 @@
     return dimensions;
   }
 
+  function decodedDimensionsMatch(width, height, expectedDimensions) {
+    const exact = width === expectedDimensions.width && height === expectedDimensions.height;
+    // Browsers can apply EXIF orientation before exposing natural dimensions.
+    // A 90/270-degree rotation only transposes the two validated axes, leaving
+    // both the maximum dimension and total pixel count within the same budget.
+    const transposed = width === expectedDimensions.height && height === expectedDimensions.width;
+    return exact || transposed;
+  }
+
   function imagePixels(objectUrl, expectedDimensions) {
     return new Promise((resolve, reject) => {
       const image = new Image();
       image.onload = function onImageLoad() {
         try {
-          if (image.naturalWidth !== expectedDimensions.width || image.naturalHeight !== expectedDimensions.height) {
+          if (!decodedDimensionsMatch(image.naturalWidth, image.naturalHeight, expectedDimensions)) {
             throw new Error("Decoded image dimensions do not match its validated header.");
           }
           const maximum = 512;
@@ -375,6 +384,7 @@
     extractTabularNumerics,
     extractJsonNumerics,
     inspectImageDimensions,
+    decodedDimensionsMatch,
     fromFile,
     fromText,
     readManifestText,

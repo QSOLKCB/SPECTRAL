@@ -99,6 +99,13 @@
     const png = new Uint8Array([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,16,1,0,0,0,1,8,2,0,0,0]);
     rejects(() => S.Core.Input.inspectImageDimensions(png));
   });
+  add("Image decode · accept EXIF-oriented transpose only", () => {
+    const encoded = { width: 640, height: 480 };
+    equal(S.Core.Input.decodedDimensionsMatch(640, 480, encoded), true, "exact dimensions");
+    equal(S.Core.Input.decodedDimensionsMatch(480, 640, encoded), true, "transposed dimensions");
+    equal(S.Core.Input.decodedDimensionsMatch(641, 480, encoded), false, "changed width");
+    equal(S.Core.Input.decodedDimensionsMatch(480, 639, encoded), false, "changed transposed height");
+  });
   add("PRNG · deterministic known answer", () => {
     const seed = S.Core.sha256Bytes(S.Core.utf8("SPECTRAL-PRNG-KAT"));
     const generator = new S.Core.Xoshiro128ss(seed);
