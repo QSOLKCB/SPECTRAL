@@ -447,7 +447,15 @@
       if (syndromes.has(cycle) && syndromes.get(cycle) !== syndromeText)
         throw new Error("Conflicting syndromes in dataset cycle.");
       syndromes.set(cycle, syndromeText);
-      grouped[cycle].push(r);
+      var error = pauliValue(r.error, model.radix);
+      var correction = pauliValue(r.correction, model.radix);
+      var residual = pauliValue(r.residual, model.radix);
+      if (q === -1 && (error || correction || residual))
+        throw new Error("Dataset placeholder rows must contain only identity operations.");
+      grouped[cycle].push({
+        cycle: cycle, qubit: q, error: error, syndrome: syndromeText,
+        correction: correction, residual: residual
+      });
       maxCycle = Math.max(maxCycle, cycle);
     });
     var totalCycles = Math.max(settings.cycles, maxCycle + 1);
