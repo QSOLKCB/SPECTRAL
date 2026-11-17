@@ -31,6 +31,11 @@
     try { fn(); } catch (_) { rejected = true; }
     if (!rejected) throw new Error("expected operation to reject invalid input");
   };
+  const rejectsAsync = async fn => {
+    let rejected = false;
+    try { await fn(); } catch (_) { rejected = true; }
+    if (!rejected) throw new Error("expected operation to reject invalid input");
+  };
 
   add("SHA-256 · empty known answer", () => equal(S.Core.sha256Hex(new Uint8Array(0)), "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"));
   add("SHA-256 · abc known answer", () => equal(S.Core.sha256Hex(S.Core.utf8("abc")), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"));
@@ -53,6 +58,46 @@
     equal(Array.from(S.Core.Input.extractJsonNumerics('{"label":"E8","values":[1.5,-2]}')).join(","), "1500000,-2000000");
     equal(Array.from(S.Core.Input.extractTabularNumerics('name,value\n"E8","1.25"\nrow2,-3', ",")).join(","), "1250000,-3000000");
     equal(S.Core.Input.classify("ambiguous.dat", "text/plain"), "binary");
+  });
+  add("Input budgets · reject declared oversize files before reads", async () => {
+    const oversized = (name, size) => {
+      const file = new File([], name);
+      let reads = 0;
+      Object.defineProperty(file, "size", { value: size });
+      Object.defineProperty(file, "arrayBuffer", { value: async () => { reads += 1; return new ArrayBuffer(0); } });
+      return { file, reads: () => reads };
+    };
+    const cases = [
+      ["source.txt", S.Core.Input.limits.textBytes + 1, file => S.Core.Input.fromFile(file)],
+      ["source.bin", S.Core.Input.limits.binaryBytes + 1, file => S.Core.Input.fromFile(file)],
+      ["source.png", S.Core.Input.limits.imageBytes + 1, file => S.Core.Input.fromFile(file)],
+      ["manifest.json", S.Core.Input.limits.manifestBytes + 1, file => S.Core.Input.readManifestText(file)],
+      ["derivative.wav", S.Core.Input.limits.derivativeBytes + 1, file => S.Core.Input.readDerivativeBytes(file)]
+    ];
+    for (const [name, size, read] of cases) {
+      const candidate = oversized(name, size);
+      await rejectsAsync(() => read(candidate.file));
+      equal(candidate.reads(), 0, name + " preflight read count");
+    }
+  });
+  add("Input tokens · preserve bounded prefix semantics", () => {
+    equal(Array.from(S.Core.Input.extractDecimalTokens("1 2 3 4", 2)).join(","), "1000000,2000000");
+    equal(Array.from(S.Core.Input.extractTabularNumerics("1,2,3,4", ",", 2)).join(","), "1000000,2000000");
+    equal(Array.from(S.Core.Input.extractJsonNumerics("[1,2,3,4]", 2)).join(","), "1000000,2000000");
+  });
+  add("Image headers · accept supported bounded dimensions", () => {
+    const png = new Uint8Array([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,3,0,0,0,2,8,2,0,0,0]);
+    const jpeg = new Uint8Array([255,216,255,192,0,17,8,0,2,0,3,3,1,17,0,2,17,0,3,17,0]);
+    const webp = new Uint8Array([82,73,70,70,22,0,0,0,87,69,66,80,86,80,56,88,10,0,0,0,0,0,0,0,2,0,0,1,0,0]);
+    for (const bytes of [png, jpeg, webp]) {
+      const dimensions = S.Core.Input.inspectImageDimensions(bytes);
+      equal(dimensions.width, 3);
+      equal(dimensions.height, 2);
+    }
+  });
+  add("Image headers · reject dimensions before native decode", () => {
+    const png = new Uint8Array([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,16,1,0,0,0,1,8,2,0,0,0]);
+    rejects(() => S.Core.Input.inspectImageDimensions(png));
   });
   add("PRNG · deterministic known answer", () => {
     const seed = S.Core.sha256Bytes(S.Core.utf8("SPECTRAL-PRNG-KAT"));

@@ -362,7 +362,7 @@
       element("cancel-render-button").hidden = false;
       try {
         this.setProgress(8, "Reading local manifest…");
-        const text = await file.text();
+        const text = await S.Core.Input.readManifestText(file);
         const manifest = JSON.parse(text);
         const source = manifest.recipe && manifest.recipe.source && manifest.recipe.source.present ? S.state.currentSource : null;
         if (manifest.recipe && manifest.recipe.source && manifest.recipe.source.present && !source) {
@@ -598,13 +598,22 @@
     async loadDerivative(file) {
       if (!file) return;
       if (!S.state.currentJob) { this.toast("Render or load a source seed first.", "error"); return; }
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const hash = S.Core.sha256Hex(bytes);
-      this.derivativePending = { file, bytes, hash };
-      element("derivative-name").textContent = file.name + " · " + bytes.length.toLocaleString() + " B";
-      element("derivative-hash").textContent = hash;
-      element("save-lineage").disabled = false;
-      this.toast("Derivative hashed locally. Audio was not uploaded.", "success");
+      try {
+        const bytes = await S.Core.Input.readDerivativeBytes(file);
+        const hash = S.Core.sha256Hex(bytes);
+        this.derivativePending = { file, bytes, hash };
+        element("derivative-name").textContent = file.name + " · " + bytes.length.toLocaleString() + " B";
+        element("derivative-hash").textContent = hash;
+        element("save-lineage").disabled = false;
+        this.toast("Derivative hashed locally. Audio was not uploaded.", "success");
+      } catch (error) {
+        this.derivativePending = null;
+        element("derivative-file").value = "";
+        element("derivative-name").textContent = "Choose local WAV / MP3 / audio file";
+        element("derivative-hash").textContent = "Nothing is uploaded.";
+        element("save-lineage").disabled = true;
+        this.toast(error.message || String(error), "error", 6500);
+      }
     }
 
     async saveLineage() {
